@@ -29,15 +29,10 @@ export default {
         ...mapGetters(['socket', 'musics'])
     },
     mounted () {
-        this.socket.emit('server_getCurrentMusicIndex');
-        this.socket.on('client_getCurrentMusicIndex', (index) => {
-            // console.log(this.$store.getters.musics);
-            // console.log(index);
-            if (index !== null) this.$store.commit('setCurrentMusicIndex', index);
-        });
-
-        this.socket.on('client_changeCurrentMusicIndex', (index) => {
-            this.$store.commit('setCurrentMusicIndex', index);
+        this.socket.emit('server_getCurrentMusic');
+        this.socket.on('client_getCurrentMusic', (music) => {
+            this.$store.commit('setCurrentMusic', music.base64Music);
+            this.$store.commit('setCurrentMusicIndex', music.index);
         });
     }
 }

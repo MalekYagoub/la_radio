@@ -36,12 +36,12 @@ export default {
         minutesAndSeconds () {
             const minutes = Math.floor(this.music.duration / 60);
             const seconds = this.music.duration % 60;
-            return `${minutes}:${seconds}`; 
+            return `${minutes}:${seconds}`;
         }
     },
     methods: {
         selectMusicToPlay (index) {
-            this.socket.emit('server_changeCurrentMusicIndex', index);
+            this.socket.emit('server_changeCurrentMusic', index);
         }
     }
 }

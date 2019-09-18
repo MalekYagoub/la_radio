@@ -14,10 +14,14 @@
       :value="!$store.getters.allowToPlay"
       @click.native="$store.commit('setAllowToPlay', true)"
     >
-      <!-- <v-btn @click="$store.commit('setAllowToPlay', true)">
-        Reprendre diffusion
-      </v-btn> -->
-      <span class="title">Cliquez quelque part pour reprendre la diffusion</span>
+      <v-container>
+        <v-row>
+          <span class="title">Cliquez pour reprendre la diffusion</span>
+        </v-row>
+        <v-row class="mt-5" justify="center">
+          <v-icon x-large>blur_on</v-icon>
+        </v-row>
+      </v-container>
     </v-overlay>
 
     <v-content v-if="$store.getters.musics.length > 0 && $store.getters.socket">
@@ -74,10 +78,11 @@ export default {
     });
 
     // Récupérer la musique en base 64 à chaque fois qu'on change de musique en changeant l'index dans la MusicList
-    socket.on('client_getMusic', (music) => {
+    socket.on('client_changeCurrentMusic', (music) => {
       console.log(music);
       this.$store.commit('setCurrentMusic', music.base64Music);
-    });
+      this.$store.commit('setCurrentMusicIndex', music.index);
+    })
   }
 };
 </script>
