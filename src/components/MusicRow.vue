@@ -1,9 +1,10 @@
 <template>
     <v-hover v-slot:default="{ hover }">
-        <v-list-item>
+        <v-list-item :class="{ 'music-row--selected': index === currentMusicIndex }">
             <v-list-item-avatar>
                 <v-img :src="music.thumbnail"></v-img>
-                <v-icon @click="selectMusicToPlay(index)" :class="{ 'play-arrow-icon--hover': hover, 'play-arrow-icon': true }">play_arrow</v-icon>
+                <v-icon v-if="musicState === 'pause' || index !== currentMusicIndex" @click="selectMusicToPlay(index)" :class="{ 'play-arrow-icon--hover': hover, 'play-arrow-icon': true }">play_arrow</v-icon>
+                <v-icon v-else @click="pauseMusic" :class="{ 'play-arrow-icon--hover': hover, 'play-arrow-icon': true }">pause</v-icon>
             </v-list-item-avatar>
 
             <v-list-item-content>
@@ -32,7 +33,7 @@ import { mapGetters } from 'vuex';
 export default {
     props: ['music', 'index'],
     computed: {
-        ...mapGetters(['socket']),
+        ...mapGetters(['socket', 'musicState', 'currentMusicIndex']),
         minutesAndSeconds () {
             const minutes = Math.floor(this.music.duration / 60);
             const seconds = this.music.duration % 60;
@@ -41,7 +42,16 @@ export default {
     },
     methods: {
         selectMusicToPlay (index) {
-            this.socket.emit('server_changeCurrentMusic', index);
+            if (index !== this.currentMusicIndex) {
+                // on entre dans ce if uniquement si on souhaite jouer une musique différente de celle qui a été joué la derniere fois avec les thumbnails
+                this.socket.emit('server_changeCurrentMusic', index);
+            } else {
+                // reprendre la lecture de la musique en cours
+                this.socket.emit('server_setMusicState', 'play');
+            }
+        },
+        pauseMusic () {
+            this.socket.emit('server_setMusicState', 'pause');
         }
     }
 }
@@ -65,5 +75,10 @@ export default {
         background-color: rgba(20, 20, 20, 0.5);
         color: white !important;
         opacity: 1;
+    }
+
+    .music-row--selected {
+        transition: 0.3s all;
+        background-color: #EEEEEE;
     }
 </style>

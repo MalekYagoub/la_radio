@@ -11,7 +11,8 @@ export default new Vuex.Store({
     currentMusicIndex: null,
     buttonDisabled: false,
     snackbar: null,
-    allowToPlay: true
+    allowToPlay: true,
+    musicState: 'pause'
   },
   mutations: {
     setSocket (state, payload) {
@@ -37,6 +38,9 @@ export default new Vuex.Store({
     },
     setCurrentMusicIndex (state, payload) {
       state.currentMusicIndex = payload;
+    },
+    setMusicState (state, payload) {
+      state.musicState = payload;
     }
   },
   getters: {
@@ -46,6 +50,7 @@ export default new Vuex.Store({
     snackbar: state => state.snackbar,
     currentMusic: state => state.currentMusic,
     currentMusicIndex: state => state.currentMusicIndex,
-    allowToPlay: state => state.allowToPlay
+    allowToPlay: state => state.allowToPlay,
+    musicState: state => state.musicState
   }
 })

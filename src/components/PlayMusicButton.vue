@@ -12,23 +12,22 @@ import { mapGetters } from 'vuex';
 export default {
     data () {
         return {
-            musicState: null,
             howler: null,
             allowedToGetMusicState: false
         }
     },
     computed: {
-        ...mapGetters(['socket', 'currentMusic', 'allowToPlay'])
+        ...mapGetters(['socket', 'musicState', 'currentMusic', 'allowToPlay'])
     },
     methods: {
         changeMusicState () {
             // Indique au serveur si on doit mettre la musique en pause ou en play pour tout le monde
-            this.musicState === 'play' ? this.musicState = 'pause' : this.musicState = 'play';
+            this.musicState === 'play' ? this.$store.commit('setMusicState', 'pause') : this.$store.commit('setMusicState', 'play');
             this.socket.emit('server_setMusicState', this.musicState);
         },
         playPauseHowler (currentMusicInfo) {
             // Lance ou coupe l'audio de la musique en cours avec Howler et met à jour le musicState des clients qui n'ont pas lancé l'action
-            this.musicState = currentMusicInfo.musicState;
+            this.$store.commit('setMusicState', currentMusicInfo.musicState);
 
             console.log(currentMusicInfo.currentMusicPosition / 1000);
             if (this.musicState === 'play' && this.howler) {
@@ -47,6 +46,17 @@ export default {
 
         this.socket.on('client_setMusicState', (currentMusicInfo) => {
             this.playPauseHowler(currentMusicInfo);
+        });
+
+        this.socket.on('client_pauseMusic', () => {
+            this.howler.pause();
+            this.$store.commit('setMusicState', 'pause');
+        });
+
+        this.socket.on('client_resumeMusic', () => {
+            console.log('testo n passe');
+            this.howler.play();
+            this.$store.commit('setMusicState', 'play');
         });
 
         this.socket.emit('server_getMusicState');

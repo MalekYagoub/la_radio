@@ -80,6 +80,7 @@ export default {
     // Récupérer la musique en base 64 à chaque fois qu'on change de musique en changeant l'index dans la MusicList
     socket.on('client_changeCurrentMusic', (music) => {
       console.log(music);
+      this.$store.commit('setMusicState', 'play');
       this.$store.commit('setCurrentMusic', music.base64Music);
       this.$store.commit('setCurrentMusicIndex', music.index);
     })
