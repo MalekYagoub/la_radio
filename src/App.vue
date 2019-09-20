@@ -26,15 +26,9 @@
 
     <v-content v-if="$store.getters.musics.length > 0 && $store.getters.socket">
       <UrlForm/>
-      <v-container v-if="$store.getters.currentMusic">
-        <v-row
-          align="center"
-          justify="center">
-          <NextPrevMusicButton nextOrPrev="prev" class="mx-4"/>
-          <PlayMusicButton class="mx-4"/>
-          <NextPrevMusicButton nextOrPrev="next" class="mx-4"/>
-        </v-row>
-      </v-container>
+      <template v-if="$store.getters.currentMusic">
+        <MusicPlayer />
+      </template>
       <v-container>
         <MusicsList/>
       </v-container>
@@ -45,19 +39,17 @@
 <script>
 import UrlForm from '@/components/UrlForm';
 import Snack from '@/components/shared/Snack';
-import PlayMusicButton from '@/components/PlayMusicButton';
-import NextPrevMusicButton from '@/components/NextPrevMusicButton';
 import MusicsList from '@/components/MusicsList';
 import io from 'socket.io-client';
+import MusicPlayer from '@/components/MusicPlayer';
 
 export default {
   name: 'App',
   components: {
     UrlForm,
     Snack,
-    PlayMusicButton,
-    NextPrevMusicButton,
-    MusicsList
+    MusicsList,
+    MusicPlayer
   },
   data () {
     return {
