@@ -7,7 +7,7 @@
             <PlayMusicButton :howler="howler" class="mx-4"/>
             <NextPrevMusicButton nextOrPrev="next" class="mx-4"/>
         </v-row>
-        <MusicSlider :howler="howler"/>
+        <MusicSlider v-if="musicSliderPosition !== null" :howler="howler" :musicSliderPosition="musicSliderPosition"/>
     </v-container>
 </template>
 
@@ -26,12 +26,13 @@ export default {
         MusicSlider
     },
     computed: {
-        ...mapGetters(['socket', 'currentMusic', 'allowToPlay', 'musicState'])
+        ...mapGetters(['socket', 'currentMusic', 'allowToPlay', 'musicState', 'musics', 'currentMusicIndex'])
     },
     data () {
         return {
             howler: null,
-            allowedToGetMusicState: false
+            allowedToGetMusicState: false,
+            musicSliderPosition: null
         }
     },
     methods: {
@@ -54,8 +55,14 @@ export default {
         });
         this.howler = sound;
 
+        this.howler.on('end', () => {
+            const indexToPass = this.currentMusicIndex === this.musics.length - 1 ? 0 : this.currentMusicIndex + 1;
+            this.socket.emit('server_changeCurrentMusic', indexToPass);
+        });
+
         this.socket.on('client_setMusicState', (currentMusicInfo) => {
             this.playPauseHowler(currentMusicInfo);
+            this.musicSliderPosition = currentMusicInfo.currentMusicPosition;
         });
 
         this.socket.on('client_pauseMusic', () => {
@@ -68,8 +75,16 @@ export default {
             this.$store.commit('setMusicState', 'play');
         });
 
+        this.socket.on('client_changeMusicPosition', (currentMusicPosition) => {
+            console.log('la nouvelle position: ' + currentMusicPosition);
+            this.musicSliderPosition = currentMusicPosition;
+            this.howler.seek(currentMusicPosition / 1000);
+        });
+
         this.socket.emit('server_getMusicState');
         this.socket.on('client_getMusicState', (currentMusicInfo) => {
+            console.log(currentMusicInfo);
+            this.musicSliderPosition = currentMusicInfo.currentMusicPosition;
             if (currentMusicInfo.musicState === 'play' && !this.allowedToGetMusicState) {
                 this.$store.commit('setAllowToPlay', false);
             } else {
@@ -91,6 +106,12 @@ export default {
             });
             this.howler = sound;
 
+            this.howler.on('end', () => {
+                const indexToPass = this.currentMusicIndex === this.musics.length - 1 ? 0 : this.currentMusicIndex + 1;
+                this.socket.emit('server_changeCurrentMusic', indexToPass);
+            });
+
+            this.musicSliderPosition = 0;
             this.playPauseHowler({
                 musicState: this.musicState,
                 currentMusicPosition: 0
