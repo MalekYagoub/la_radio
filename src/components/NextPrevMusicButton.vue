@@ -1,5 +1,5 @@
 <template>
-    <v-btn @click="changeMusic" fab large>
+    <v-btn color="primary" dark @click="changeMusic" fab large>
         <v-icon dark v-if="nextOrPrev === 'prev'">skip_previous</v-icon>
         <v-icon dark v-else>skip_next</v-icon>
     </v-btn>

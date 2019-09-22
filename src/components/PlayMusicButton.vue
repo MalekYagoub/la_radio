@@ -1,5 +1,5 @@
 <template>
-    <v-btn :disabled="!currentMusic" fab large @click="changeMusicState">
+    <v-btn color="primary" dark :disabled="!currentMusic" fab large @click="changeMusicState">
         <v-icon dark v-if="musicState === 'play'">pause</v-icon>
         <v-icon dark v-else>play_arrow</v-icon>
     </v-btn>

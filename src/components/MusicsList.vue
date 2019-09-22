@@ -1,6 +1,6 @@
 <template>
     <v-card max-width="550" class="mx-auto">
-        <v-toolbar color="#3949AB" dark>
+        <v-toolbar color="accent" dark>
             <v-toolbar-title>Bibliothèque</v-toolbar-title>
             <div class="flex-grow-1"></div>
 
@@ -38,9 +38,9 @@ export default {
 }
 </script>
 
-<style scoped>
+<style scoped lang="scss">
     .musics-list {
-        max-height: 250px;
+        max-height: 380px;
         overflow-y: auto;
     }    
 </style>

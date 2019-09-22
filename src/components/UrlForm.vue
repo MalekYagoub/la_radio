@@ -18,7 +18,8 @@
                     <v-btn
                         @click="addMusic"
                         :disabled="!isValid || loading"
-                        :loading="loading">
+                        :loading="loading"
+                        color="secondary">
                         Ajouter
                     </v-btn>
                 </v-col>
@@ -61,7 +62,7 @@ export default {
         this.socket.on('client_addedMusic', (music) => {
             this.loading = false;
             this.$store.commit('appendMusic', music);
-            this.$store.commit('setSnackbar', {color: '#3949AB', message: 'Une musique a été ajoutée'});
+            this.$store.commit('setSnackbar', {color: 'primary', message: 'Une musique a été ajoutée'});
         });
 
     }

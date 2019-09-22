@@ -1,26 +1,26 @@
 <template>
-    <v-row justify="center" align="center">
+    <div class="d-inline-flex">
         <v-col cols="auto">
             <span style="width: 55px;" class="grey--text">{{musicPositionFormatted[0]}}</span>
         </v-col>
-        <v-col cols="4">
+        <v-col cols="auto">
             <v-slider
                 v-model="musicSliderPositionSeconds"
                 min="0"
                 :max="musics[currentMusicIndex].duration"
                 @change="onMusicPositionChange"
                 :height="0"
-                :color="'#3949AB'"
-                track-color="#3949AB"
+                color="primary"
+                track-color="primary"
                 inverse-label
                 style="width: 600px;"
-                class="pt-5"
+                class="pt-3"
             ></v-slider>
         </v-col>
         <v-col cols="auto">
             <span style="width: 55px;" class="grey--text">{{musicPositionFormatted[1]}}</span>
         </v-col>
-    </v-row>
+    </div>
 </template>
 
 <script>

@@ -1,25 +1,32 @@
 <template>
     <v-container v-if="howler && allowToPlay">
-        <v-row justify="center" class="mb-3">
-            <v-card width="200" height="125" :elevation="10">
-                <v-img :src="musics[currentMusicIndex].thumbnail"
-                    width="200"
-                    height="125"/>
-            </v-card>
+        <v-row justify="center" align="end">
+            <div class="d-inline-flex flex-column">
+                <div class="d-inline-flex">
+                    <v-col cols="auto">
+                        <v-card width="200" height="125" :elevation="10">
+                            <v-img :src="musics[currentMusicIndex].thumbnail"
+                                width="200"
+                                height="125"/>
+                        </v-card>
+                    </v-col>
+                    <div class="d-flex flex-column">
+                        <v-col cols="auto">
+                            <span class="title font-weight-medium">{{musics[currentMusicIndex].videoTitle}}</span>
+                        </v-col>
+                        <v-col cols="auto">
+                            <div class="d-flex align-center">
+                                <NextPrevMusicButton nextOrPrev="prev" class="mx-4"/>
+                                <PlayMusicButton :howler="howler" class="mx-4"/>
+                                <NextPrevMusicButton nextOrPrev="next" class="mx-4"/>
+                                <MusicVolume :volume="volume" @changeVolume="changeVolume"/>
+                            </div>
+                        </v-col>
+                    </div>
+                </div>
+                <MusicSlider class="mt-2" v-if="musicSliderPosition !== null" :howler="howler" :lastMusicInfo="lastMusicInfo" :musicSliderPosition="musicSliderPosition"/>
+            </div>
         </v-row>
-        <v-row
-            class="mb-3"
-            justify="center">
-            <span class="title font-weight-medium">{{musics[currentMusicIndex].videoTitle}}</span>
-        </v-row>
-        <v-row
-            align="center"
-            justify="center">
-            <NextPrevMusicButton nextOrPrev="prev" class="mx-4"/>
-            <PlayMusicButton :howler="howler" class="mx-4"/>
-            <NextPrevMusicButton nextOrPrev="next" class="mx-4"/>
-        </v-row>
-        <MusicSlider class="mt-2" v-if="musicSliderPosition !== null" :howler="howler" :lastMusicInfo="lastMusicInfo" :musicSliderPosition="musicSliderPosition"/>
     </v-container>
 </template>
 
@@ -30,13 +37,15 @@ import { mapGetters } from 'vuex';
 import PlayMusicButton from '@/components/PlayMusicButton';
 import NextPrevMusicButton from '@/components/NextPrevMusicButton';
 import MusicSlider from '@/components/MusicSlider';
+import MusicVolume from '@/components/MusicVolume';
 
 export default {
     // Remonter toutes les actions du PlayButton dans le player
     components: {
         PlayMusicButton,
         NextPrevMusicButton,
-        MusicSlider
+        MusicSlider,
+        MusicVolume
     },
     computed: {
         ...mapGetters(['socket', 'currentMusic', 'allowToPlay', 'musicState', 'musics', 'currentMusicIndex'])
@@ -46,7 +55,8 @@ export default {
             howler: null,
             allowedToGetMusicState: false,
             musicSliderPosition: null,
-            lastMusicInfo: null
+            lastMusicInfo: null,
+            volume: 1,
         }
     },
     methods: {
@@ -61,12 +71,16 @@ export default {
             } else if (this.musicState === 'pause' && this.howler) {
                 this.howler.pause();
             }
+        },
+        changeVolume (volume) {
+            this.volume = volume / 100;
+            if (this.howler) this.howler.volume(this.volume);
         }
     },
     mounted () {
         let sound = new Howl({
             src: ['data:audio/mp3;base64,' + this.currentMusic],
-            volume: 0.3
+            volume: this.volume
         });
         this.howler = sound;
 
@@ -117,7 +131,7 @@ export default {
             if (this.howler) this.howler.unload();
             let sound = new Howl({
                 src: ['data:audio/mp3;base64,' + this.currentMusic],
-                volume: 0.3
+                volume: this.volume
             });
             this.howler = sound;
 
@@ -136,5 +150,8 @@ export default {
 </script>
 
 <style>
-    
+    .music-player {
+        display: flex;
+        flex-direction: column;
+    }
 </style>

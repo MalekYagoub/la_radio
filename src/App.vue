@@ -1,6 +1,6 @@
 <template>
   <v-app>
-    <v-app-bar app>
+    <v-app-bar app dark class="primary">
       <v-toolbar-title class="headline text-uppercase">
         <span>La Radio <v-icon>radio</v-icon></span>
       </v-toolbar-title>
@@ -30,7 +30,7 @@
         <MusicsList/>
       </v-container>
       <template v-if="$store.getters.currentMusic">
-        <MusicPlayer  class="mt-10"/>
+        <MusicPlayer  class="mt-6"/>
       </template>
     </v-content>
   </v-app>
@@ -58,6 +58,16 @@ export default {
     }
   },
   mounted () {
+    // Light theme
+    this.$vuetify.theme.themes.light.primary = '#363237';
+    this.$vuetify.theme.themes.light.secondary = '#2D4262';
+    this.$vuetify.theme.themes.light.accent = '#655450';
+
+    // Dark theme
+    this.$vuetify.theme.themes.dark.primary = '#363237';
+    this.$vuetify.theme.themes.dark.secondary = '#2D4262';
+    this.$vuetify.theme.themes.dark.accent = '#655450';
+
     // On crée notre socket
     const socket = io('http://127.0.0.1:3000');
     // On l'enregistre dans notre state pour ne pas le perdre
