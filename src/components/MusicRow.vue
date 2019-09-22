@@ -36,7 +36,8 @@ export default {
         ...mapGetters(['socket', 'musicState', 'currentMusicIndex']),
         minutesAndSeconds () {
             const minutes = Math.floor(this.music.duration / 60);
-            const seconds = this.music.duration % 60;
+            let seconds = this.music.duration % 60;
+            if (seconds < 10) seconds = '0' + seconds;
             return `${minutes}:${seconds}`;
         }
     },

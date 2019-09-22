@@ -6,7 +6,6 @@
 </template>
 
 <script>
-import {Howl} from 'howler';
 import { mapGetters } from 'vuex';
 
 export default {

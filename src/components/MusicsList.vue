@@ -1,6 +1,6 @@
 <template>
     <v-card max-width="550" class="mx-auto">
-        <v-toolbar color="#537072" dark>
+        <v-toolbar color="#3949AB" dark>
             <v-toolbar-title>Bibliothèque</v-toolbar-title>
             <div class="flex-grow-1"></div>
 
@@ -9,7 +9,7 @@
             </v-btn>
         </v-toolbar>
 
-        <v-list one-line>
+        <v-list one-line class="musics-list">
             <template v-for="(music, index) in musics">
                 <MusicRow :music="music" :index="index" :key="index"/>
             </template>
@@ -38,6 +38,9 @@ export default {
 }
 </script>
 
-<style lang="">
-    
+<style scoped>
+    .musics-list {
+        max-height: 250px;
+        overflow-y: auto;
+    }    
 </style>

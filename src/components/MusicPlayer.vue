@@ -1,5 +1,17 @@
 <template>
-    <v-container v-if="howler">
+    <v-container v-if="howler && allowToPlay">
+        <v-row justify="center" class="mb-3">
+            <v-card width="200" height="125" :elevation="10">
+                <v-img :src="musics[currentMusicIndex].thumbnail"
+                    width="200"
+                    height="125"/>
+            </v-card>
+        </v-row>
+        <v-row
+            class="mb-3"
+            justify="center">
+            <span class="title font-weight-medium">{{musics[currentMusicIndex].videoTitle}}</span>
+        </v-row>
         <v-row
             align="center"
             justify="center">
@@ -7,11 +19,12 @@
             <PlayMusicButton :howler="howler" class="mx-4"/>
             <NextPrevMusicButton nextOrPrev="next" class="mx-4"/>
         </v-row>
-        <MusicSlider v-if="musicSliderPosition !== null" :howler="howler" :musicSliderPosition="musicSliderPosition"/>
+        <MusicSlider class="mt-2" v-if="musicSliderPosition !== null" :howler="howler" :lastMusicInfo="lastMusicInfo" :musicSliderPosition="musicSliderPosition"/>
     </v-container>
 </template>
 
 <script>
+import { Howl } from 'howler';
 import { mapGetters } from 'vuex';
 
 import PlayMusicButton from '@/components/PlayMusicButton';
@@ -32,7 +45,8 @@ export default {
         return {
             howler: null,
             allowedToGetMusicState: false,
-            musicSliderPosition: null
+            musicSliderPosition: null,
+            lastMusicInfo: null
         }
     },
     methods: {
@@ -51,7 +65,8 @@ export default {
     },
     mounted () {
         let sound = new Howl({
-            src: ['data:audio/mp3;base64,' + this.currentMusic]
+            src: ['data:audio/mp3;base64,' + this.currentMusic],
+            volume: 0.3
         });
         this.howler = sound;
 
@@ -62,7 +77,7 @@ export default {
 
         this.socket.on('client_setMusicState', (currentMusicInfo) => {
             this.playPauseHowler(currentMusicInfo);
-            this.musicSliderPosition = currentMusicInfo.currentMusicPosition;
+            this.lastMusicInfo = currentMusicInfo;
         });
 
         this.socket.on('client_pauseMusic', () => {
@@ -76,8 +91,7 @@ export default {
         });
 
         this.socket.on('client_changeMusicPosition', (currentMusicPosition) => {
-            console.log('la nouvelle position: ' + currentMusicPosition);
-            this.musicSliderPosition = currentMusicPosition;
+            console.log(currentMusicPosition / 1000);
             this.howler.seek(currentMusicPosition / 1000);
         });
 
@@ -102,7 +116,8 @@ export default {
         currentMusic () {
             if (this.howler) this.howler.unload();
             let sound = new Howl({
-                src: ['data:audio/mp3;base64,' + this.currentMusic]
+                src: ['data:audio/mp3;base64,' + this.currentMusic],
+                volume: 0.3
             });
             this.howler = sound;
 
@@ -111,7 +126,6 @@ export default {
                 this.socket.emit('server_changeCurrentMusic', indexToPass);
             });
 
-            this.musicSliderPosition = 0;
             this.playPauseHowler({
                 musicState: this.musicState,
                 currentMusicPosition: 0

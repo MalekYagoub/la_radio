@@ -61,7 +61,7 @@ export default {
         this.socket.on('client_addedMusic', (music) => {
             this.loading = false;
             this.$store.commit('appendMusic', music);
-            this.$store.commit('setSnackbar', {color: '#537072', message: 'Une musique a été ajoutée'});
+            this.$store.commit('setSnackbar', {color: '#3949AB', message: 'Une musique a été ajoutée'});
         });
 
     }

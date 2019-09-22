@@ -26,12 +26,12 @@
 
     <v-content v-if="$store.getters.musics.length > 0 && $store.getters.socket">
       <UrlForm/>
-      <template v-if="$store.getters.currentMusic">
-        <MusicPlayer />
-      </template>
       <v-container>
         <MusicsList/>
       </v-container>
+      <template v-if="$store.getters.currentMusic">
+        <MusicPlayer  class="mt-10"/>
+      </template>
     </v-content>
   </v-app>
 </template>
@@ -71,7 +71,7 @@ export default {
 
     // Récupérer la musique en base 64 à chaque fois qu'on change de musique en changeant l'index dans la MusicList
     socket.on('client_changeCurrentMusic', (music) => {
-      console.log(music);
+      socket.emit('server_refreshPreviousMusicEnded');
       this.$store.commit('setMusicState', 'play');
       this.$store.commit('setCurrentMusic', music.base64Music);
       this.$store.commit('setCurrentMusicIndex', music.index);
