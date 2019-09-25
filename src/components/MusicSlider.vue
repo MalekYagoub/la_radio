@@ -53,6 +53,12 @@ export default {
         }
     },
     mounted () {
+        if (this.musicState === 'play') {
+            this.lastInterval = setInterval(() => {
+                this.musicSliderPositionSeconds += 1;
+            }, 1000);
+        }
+
         this.socket.on('client_changeMusicPosition', (currentMusicPosition) => {
             this.musicSliderPositionSeconds = currentMusicPosition / 1000;
         });

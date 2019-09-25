@@ -17,12 +17,39 @@
                 </v-list-item-subtitle>
             </v-list-item-content>
 
-            <v-btn icon class="mx-2">
-                <v-icon color="red">delete</v-icon>
-            </v-btn>
-            <v-btn icon>
-                <v-icon color="blue">playlist_add</v-icon>
-            </v-btn>
+            <v-menu bottom right transition="scale-transition">
+                <template v-slot:activator="{ on }">
+                <v-btn
+                    color="secondary"
+                    icon
+                    v-on="on"
+                >
+                    <v-icon>mdi-dots-vertical</v-icon>
+                </v-btn>
+                </template>
+
+                <v-list flat dense>
+                    <v-list-item>
+                        <v-list-item-icon><v-icon color="secondary">playlist_add</v-icon></v-list-item-icon>
+                        <v-list-item-title>Ajouter à la playlist</v-list-item-title>
+                    </v-list-item>
+                    <v-list-item @click="showDeleteModal = true">
+                        <v-list-item-icon><v-icon color="#b30000">delete</v-icon></v-list-item-icon>
+                        <v-list-item-title>Supprimer la musique</v-list-item-title>
+                    </v-list-item>
+                </v-list>
+            </v-menu>
+
+            <v-dialog v-model="showDeleteModal" max-width="290">
+                <v-card>
+                    <v-card-title class="subtitle-1">Voulez vous vraiment supprimer cette musique ?</v-card-title>
+                    <v-card-actions>
+                        <div class="flex-grow-1"></div>
+                        <v-btn color="secondary" text @click="showDeleteModal = false">Annuler</v-btn>
+                        <v-btn color="secondary" text @click="deleteMusic">Valider</v-btn>
+                    </v-card-actions>
+                </v-card>
+            </v-dialog>
         </v-list-item>
     </v-hover>
 </template>
@@ -32,8 +59,13 @@ import { mapGetters } from 'vuex';
 
 export default {
     props: ['music', 'index'],
+    data () {
+        return {
+            showDeleteModal: false
+        }
+    },
     computed: {
-        ...mapGetters(['socket', 'musicState', 'currentMusicIndex']),
+        ...mapGetters(['socket', 'musicState', 'currentMusicIndex', 'musics']),
         minutesAndSeconds () {
             const minutes = Math.floor(this.music.duration / 60);
             let seconds = this.music.duration % 60;
@@ -53,6 +85,10 @@ export default {
         },
         pauseMusic () {
             this.socket.emit('server_setMusicState', 'pause');
+        },
+        deleteMusic () {
+            this.socket.emit('server_deleteMusic', this.index);
+            this.showDeleteModal = false;
         }
     }
 }

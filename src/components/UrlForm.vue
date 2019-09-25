@@ -34,7 +34,7 @@ import { mapGetters } from 'vuex';
 
 export default {
     computed: {
-        ...mapGetters(['socket'])
+        ...mapGetters(['socket', 'snackbar', 'musics'])
     },
     data () {
         return {
@@ -60,11 +60,10 @@ export default {
         });
 
         this.socket.on('client_addedMusic', (music) => {
-            this.loading = false;
             this.$store.commit('appendMusic', music);
-            this.$store.commit('setSnackbar', {color: 'primary', message: 'Une musique a été ajoutée'});
+            this.$store.commit('setSnackbar', {color: 'secondary', message: 'Une musique a été ajoutée'});
+            this.loading = false;
         });
-
     }
 }
 </script>

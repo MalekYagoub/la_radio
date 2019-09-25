@@ -1,7 +1,7 @@
 <template>
-    <v-container v-if="howler && allowToPlay">
+    <v-container v-if="howler && allowToPlay" class="music-player-container">
         <v-row justify="center" align="end">
-            <div class="d-inline-flex flex-column">
+            <div class="d-inline-flex flex-column" style="width: 742px;">
                 <div class="d-inline-flex">
                     <v-col cols="auto">
                         <v-card width="200" height="125" :elevation="10">
@@ -48,7 +48,7 @@ export default {
         MusicVolume
     },
     computed: {
-        ...mapGetters(['socket', 'currentMusic', 'allowToPlay', 'musicState', 'musics', 'currentMusicIndex'])
+        ...mapGetters(['socket', 'currentMusic', 'allowToPlay', 'musicState', 'musics', 'currentMusicIndex', 'initFirstMusic'])
     },
     data () {
         return {
@@ -57,6 +57,7 @@ export default {
             musicSliderPosition: null,
             lastMusicInfo: null,
             volume: 1,
+            getMusicStateHandler: () => {}
         }
     },
     methods: {
@@ -85,7 +86,8 @@ export default {
         this.howler = sound;
 
         this.howler.on('end', () => {
-            const indexToPass = this.currentMusicIndex === this.musics.length - 1 ? 0 : this.currentMusicIndex + 1;
+            // const indexToPass = this.currentMusicIndex === this.musics.length - 1 ? 0 : this.currentMusicIndex + 1;
+            const indexToPass = (this.currentMusicIndex + 1) % (this.musics.length);
             this.socket.emit('server_changeCurrentMusic', indexToPass);
         });
 
@@ -109,16 +111,23 @@ export default {
             this.howler.seek(currentMusicPosition / 1000);
         });
 
+        const vm = this;
         this.socket.emit('server_getMusicState');
-        this.socket.on('client_getMusicState', (currentMusicInfo) => {
-            console.log(currentMusicInfo);
-            this.musicSliderPosition = currentMusicInfo.currentMusicPosition;
-            if (currentMusicInfo.musicState === 'play' && !this.allowedToGetMusicState) {
-                this.$store.commit('setAllowToPlay', false);
+        this.getMusicStateHandler = (currentMusicInfo) => {
+            vm.musicSliderPosition = currentMusicInfo.currentMusicPosition;
+            if (currentMusicInfo.musicState === 'play' && !vm.allowedToGetMusicState && !vm.initFirstMusic) {
+                vm.$store.commit('setAllowToPlay', false);
             } else {
-                this.playPauseHowler(currentMusicInfo);
+                if (vm.initFirstMusic) vm.$store.commit('setInitFirstMusic', false);
+                vm.playPauseHowler(currentMusicInfo);
             }
-        });
+        }
+        this.socket.on('client_getMusicState', this.getMusicStateHandler);
+    },
+    beforeDestroy () {
+        // A chaque fois qu'on destroy le player, on enlève l'écoute du getMusicState, pour ne pas accumuler les écoutes
+        this.socket.removeListener('client_getMusicState', this.getMusicStateHandler);
+        if (this.howler) this.howler.unload();
     },
     watch: {
         allowToPlay () {
@@ -136,7 +145,8 @@ export default {
             this.howler = sound;
 
             this.howler.on('end', () => {
-                const indexToPass = this.currentMusicIndex === this.musics.length - 1 ? 0 : this.currentMusicIndex + 1;
+                // const indexToPass = this.currentMusicIndex === this.musics.length - 1 ? 0 : this.currentMusicIndex + 1;
+                const indexToPass = (this.currentMusicIndex + 1) % (this.musics.length);
                 this.socket.emit('server_changeCurrentMusic', indexToPass);
             });
 
@@ -150,6 +160,10 @@ export default {
 </script>
 
 <style>
+    .music-player-container {
+        position: absolute;
+        bottom: 25px;
+    }
     .music-player {
         display: flex;
         flex-direction: column;

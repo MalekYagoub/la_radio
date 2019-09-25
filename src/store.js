@@ -9,23 +9,24 @@ export default new Vuex.Store({
     musics: [],
     currentMusic: null,
     currentMusicIndex: null,
-    buttonDisabled: false,
     snackbar: null,
     allowToPlay: true,
-    musicState: 'pause'
+    musicState: 'pause',
+    musicToDelete: null,
+    initFirstMusic: false
   },
   mutations: {
     setSocket (state, payload) {
       state.socket = payload;
-    },
-    setButtonDisabled (state, payload) {
-      state.buttonDisabled = payload;
     },
     setMusics (state, payload) {
       state.musics = payload;
     },
     appendMusic (state, payload) {
       state.musics.push(payload);
+    },
+    deleteMusic (state, payload) {
+      state.musics.splice(payload.index, 1);
     },
     setSnackbar (state, payload) {
       state.snackbar = payload;
@@ -41,16 +42,23 @@ export default new Vuex.Store({
     },
     setMusicState (state, payload) {
       state.musicState = payload;
+    },
+    setMusicToDelete (state, payload) {
+      state.musicToDelete = payload;
+    },
+    setInitFirstMusic (state, payload) {
+      state.initFirstMusic = payload;
     }
   },
   getters: {
     socket: state => state.socket,
-    buttonDisabled: state => state.buttonDisabled,
     musics: state => state.musics,
     snackbar: state => state.snackbar,
     currentMusic: state => state.currentMusic,
     currentMusicIndex: state => state.currentMusicIndex,
     allowToPlay: state => state.allowToPlay,
-    musicState: state => state.musicState
+    musicState: state => state.musicState,
+    musicToDelete: state => state.musicToDelete,
+    initFirstMusic: state => state.initFirstMusic
   }
 })

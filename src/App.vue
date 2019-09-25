@@ -24,13 +24,13 @@
       </v-container>
     </v-overlay>
 
-    <v-content v-if="$store.getters.musics.length > 0 && $store.getters.socket">
+    <v-content v-if="$store.getters.socket">
       <UrlForm/>
       <v-container>
         <MusicsList/>
       </v-container>
       <template v-if="$store.getters.currentMusic">
-        <MusicPlayer  class="mt-6"/>
+        <MusicPlayer class="mt-6"/>
       </template>
     </v-content>
   </v-app>
@@ -42,6 +42,7 @@ import Snack from '@/components/shared/Snack';
 import MusicsList from '@/components/MusicsList';
 import io from 'socket.io-client';
 import MusicPlayer from '@/components/MusicPlayer';
+import { mapGetters } from 'vuex';
 
 export default {
   name: 'App',
@@ -50,6 +51,9 @@ export default {
     Snack,
     MusicsList,
     MusicPlayer
+  },
+  computed: {
+    ...mapGetters(['musicToDelete', 'currentMusic'])
   },
   data () {
     return {
@@ -79,13 +83,34 @@ export default {
       this.$store.commit('setMusics', musics);
     });
 
+    socket.emit('server_getCurrentMusicIndex');
+    socket.on('client_getCurrentMusicIndex', (currentMusicIndex) => {
+      this.$store.commit('setCurrentMusicIndex', currentMusicIndex);
+    });
+
     // Récupérer la musique en base 64 à chaque fois qu'on change de musique en changeant l'index dans la MusicList
     socket.on('client_changeCurrentMusic', (music) => {
       socket.emit('server_refreshPreviousMusicEnded');
+      if (!this.currentMusic) {
+        // On passe de pas de musique à une musique
+        this.$store.commit('setInitFirstMusic', true);
+      }
       this.$store.commit('setMusicState', 'play');
       this.$store.commit('setCurrentMusic', music.base64Music);
       this.$store.commit('setCurrentMusicIndex', music.index);
-    })
+
+      if (this.musicToDelete) {
+        this.$store.commit('deleteMusic', this.musicToDelete);
+        this.$store.commit('setSnackbar', {color: 'secondary', message: 'Une musique a été supprimée'});
+        this.$store.commit('setMusicToDelete', null);
+      }
+    });
   }
 };
 </script>
+
+<style scoped>
+  main {
+    background-color: #f5f5f5;
+  }
+</style>

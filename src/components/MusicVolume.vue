@@ -1,21 +1,22 @@
 <template>
-    <v-slider
-        v-model="volumeCmp"
-        style="height: 32px; width: 170px;"
-        color="secondary"
-        track-color="secondary"
-        @change="changeVolume"
-    >
-        <template v-slot:prepend>
-          <v-icon
+    <div style="height: 32px; width: 135px;">
+        <v-slider
+            v-model="volumeCmp"
             color="secondary"
-            style="cursor: pointer;"
-            @click.native="muteVolume"
-          >
-            {{iconToShow}}
-          </v-icon>
-        </template>
-    </v-slider>
+            track-color="secondary"
+            @change="changeVolume"
+        >
+            <template v-slot:prepend>
+            <v-icon
+                color="secondary"
+                style="cursor: pointer;"
+                @click.native="muteVolume"
+            >
+                {{iconToShow}}
+            </v-icon>
+            </template>
+        </v-slider>
+    </div>
 </template>
 
 <script>
