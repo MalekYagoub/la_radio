@@ -32,11 +32,11 @@ export default {
         ...mapGetters(['socket', 'currentMusicIndex', 'currentMusic', 'musics', 'musicState']),
         musicPositionFormatted () {
             const minutes = Math.floor(this.musicSliderPositionSeconds / 60);
-            let seconds = this.musicSliderPositionSeconds % 60;
+            let seconds = (this.musicSliderPositionSeconds % 60).toFixed(0);
             if (seconds < 10) seconds = '0' + seconds;
             const totalSecondsLeft = this.musics[this.currentMusicIndex].duration - this.musicSliderPositionSeconds;
             const minutesLeft = Math.floor(totalSecondsLeft / 60);
-            let secondsLeft = totalSecondsLeft % 60;
+            let secondsLeft = (totalSecondsLeft % 60).toFixed(0);
             if (secondsLeft < 10) secondsLeft = '0' + secondsLeft;
             return [`${minutes}:${seconds}`, `- ${minutesLeft}:${secondsLeft}`];
         }

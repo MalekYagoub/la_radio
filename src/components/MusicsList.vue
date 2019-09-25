@@ -4,20 +4,31 @@
             <v-toolbar-title>Bibliothèque</v-toolbar-title>
             <div class="flex-grow-1"></div>
 
-            <v-btn icon>
-                <v-icon>mdi-magnify</v-icon>
-            </v-btn>
+            <v-text-field
+                class="mt-6"
+                prepend-icon="search"
+                label="Recherche"
+                dense
+                v-model="query"
+                style="width: 100px;"
+            ></v-text-field>
         </v-toolbar>
 
         <v-list v-if="musics.length > 0" one-line class="musics-list">
-            <template v-for="(music, index) in musics">
-                <MusicRow :music="music" :index="index" :key="index"/>
+            <template v-for="(music, index) in computedMusicsList">
+                <MusicRow :music="music" :index="findMusicIndex(music)" :key="index"/>
             </template>
         </v-list>
         <v-card-text v-else class="primary--text text-center font-weight-medium">
             <div class="d-flex flex-column">
                 <span>Aucune musique n'est présente dans la bibliothèque</span>
                 <v-icon class="mt-2" x-large color="secondary">music_off</v-icon>
+            </div>
+        </v-card-text>
+        <v-card-text v-if="query.length > 0 && computedMusicsList.length === 0" class="primary--text text-center font-weight-medium">
+            <div class="d-flex flex-column">
+                <span>Aucune musique ne correspond à votre recherche</span>
+                <v-icon class="mt-2" x-large color="secondary">youtube_searched_for</v-icon>
             </div>
         </v-card-text>
     </v-card>
@@ -31,8 +42,27 @@ export default {
     components: {
         MusicRow
     },
+    data () {
+        return {
+            query: '',
+            showSearchInput: false
+        }
+    },
     computed: {
-        ...mapGetters(['socket', 'musics', 'currentMusicIndex', 'initFirstMusic'])
+        ...mapGetters(['socket', 'musics', 'currentMusicIndex', 'initFirstMusic']),
+        computedMusicsList: function () {
+            if (this.musics.length > 0) {
+            let vm = this;
+            return this.musics.filter((music) => {
+                return music.videoTitle.toLowerCase().indexOf(vm.query.toLowerCase()) !== -1;
+            });
+            }
+        }
+    },
+    methods: {
+        findMusicIndex (musicToCheck) {
+            return this.musics.findIndex((music) => musicToCheck.videoId === music.videoId);
+        }
     },
     mounted () {
         if (this.musics.length > 0 && this.currentMusicIndex) this.socket.emit('server_getCurrentMusic');
@@ -57,6 +87,7 @@ export default {
                     if (this.currentMusicIndex < this.musics.length - 1) {
                         indexToPass--;
                     }
+
                     this.$store.commit('setMusicToDelete', deletedMusicInfo);
                     this.socket.emit('server_changeCurrentMusic', indexToPass);
                 }
