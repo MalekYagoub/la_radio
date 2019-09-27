@@ -52,11 +52,12 @@ export default {
         ...mapGetters(['socket', 'musics', 'currentMusicIndex', 'initFirstMusic']),
         computedMusicsList: function () {
             if (this.musics.length > 0) {
-            let vm = this;
-            return this.musics.filter((music) => {
-                return music.videoTitle.toLowerCase().indexOf(vm.query.toLowerCase()) !== -1;
-            });
+                let vm = this;
+                return this.musics.filter((music) => {
+                    return music.videoTitle.toLowerCase().indexOf(vm.query.toLowerCase()) !== -1;
+                });
             }
+            return this.musics;
         }
     },
     methods: {
