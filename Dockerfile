@@ -6,6 +6,10 @@ RUN npm install -g http-server
 # définit le dossier 'app' comme dossier de travail
 WORKDIR /app
 
+# créer  le fichier .env avec les variables d'environnement
+RUN touch .env
+RUN echo "VUE_APP_SERVER_URL='http://206.189.61.231:8080/'" >> .env
+
 # copie 'package.json' et 'package-lock.json' (si disponible)
 COPY package*.json ./
 

@@ -73,7 +73,7 @@ export default {
     this.$vuetify.theme.themes.dark.accent = '#655450';
 
     // On crée notre socket
-    const socket = io('http://127.0.0.1:3000');
+    const socket = io(process.env.VUE_APP_SERVER_URL);
     // On l'enregistre dans notre state pour ne pas le perdre
     this.$store.commit('setSocket', socket);
 

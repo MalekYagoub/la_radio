@@ -65,7 +65,6 @@ export default {
             // Lance ou coupe l'audio de la musique en cours avec Howler et met à jour le musicState des clients qui n'ont pas lancé l'action
             this.$store.commit('setMusicState', currentMusicInfo.musicState);
 
-            console.log(currentMusicInfo.currentMusicPosition / 1000);
             if (this.musicState === 'play' && this.howler) {
                 this.howler.seek(currentMusicInfo.currentMusicPosition / 1000);
                 this.howler.play();
@@ -107,7 +106,6 @@ export default {
         });
 
         this.socket.on('client_changeMusicPosition', (currentMusicPosition) => {
-            console.log(currentMusicPosition / 1000);
             this.howler.seek(currentMusicPosition / 1000);
         });
 
