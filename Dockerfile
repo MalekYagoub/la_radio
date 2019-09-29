@@ -8,7 +8,7 @@ WORKDIR /app
 
 # créer  le fichier .env avec les variables d'environnement
 RUN touch .env
-RUN echo "VUE_APP_SERVER_URL='http://206.189.61.231:8080/'" >> .env
+RUN echo "VUE_APP_SERVER_URL='http://206.189.61.231:3000/'" >> .env
 
 # copie 'package.json' et 'package-lock.json' (si disponible)
 COPY package*.json ./
