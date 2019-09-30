@@ -1,7 +1,20 @@
 <template>
     <v-hover v-slot:default="{ hover }">
         <v-list-item :class="{ 'music-row--selected': index === currentMusicIndex }">
-            <v-list-item-avatar>
+            <v-progress-circular
+                v-if="loadingNewMusicIndex && loadingNewMusicIndex === index"
+                indeterminate
+                color="secondary"
+                :size="46"
+                class="mr-5"
+                style="width: 46px;">
+                <v-list-item-avatar style="margin: auto;">
+                    <v-img :src="music.thumbnail"></v-img>
+                    <v-icon v-if="musicState === 'pause' || index !== currentMusicIndex" @click="selectMusicToPlay(index)" :class="{ 'play-arrow-icon--hover': hover, 'play-arrow-icon': true }">play_arrow</v-icon>
+                    <v-icon v-else @click="pauseMusic" :class="{ 'play-arrow-icon--hover': hover, 'play-arrow-icon': true }">pause</v-icon>
+                </v-list-item-avatar>
+            </v-progress-circular>
+            <v-list-item-avatar style="margin-left: 3px" v-else>
                 <v-img :src="music.thumbnail"></v-img>
                 <v-icon v-if="musicState === 'pause' || index !== currentMusicIndex" @click="selectMusicToPlay(index)" :class="{ 'play-arrow-icon--hover': hover, 'play-arrow-icon': true }">play_arrow</v-icon>
                 <v-icon v-else @click="pauseMusic" :class="{ 'play-arrow-icon--hover': hover, 'play-arrow-icon': true }">pause</v-icon>
@@ -65,7 +78,7 @@ export default {
         }
     },
     computed: {
-        ...mapGetters(['socket', 'musicState', 'currentMusicIndex', 'musics']),
+        ...mapGetters(['socket', 'musicState', 'currentMusicIndex', 'musics', 'loadingNewMusicIndex']),
         minutesAndSeconds () {
             const minutes = Math.floor(this.music.duration / 60);
             let seconds = this.music.duration % 60;

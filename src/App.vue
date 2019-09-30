@@ -90,6 +90,8 @@ export default {
 
     // Récupérer la musique en base 64 à chaque fois qu'on change de musique en changeant l'index dans la MusicList
     socket.on('client_changeCurrentMusic', (music) => {
+      this.$store.commit('setLoadingNewMusicIndex', null);
+
       socket.emit('server_refreshPreviousMusicEnded');
       if (!this.currentMusic) {
         // On passe de pas de musique à une musique

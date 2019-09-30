@@ -13,7 +13,8 @@ export default new Vuex.Store({
     allowToPlay: true,
     musicState: 'pause',
     musicToDelete: null,
-    initFirstMusic: false
+    initFirstMusic: false,
+    loadingNewMusicIndex: null
   },
   mutations: {
     setSocket (state, payload) {
@@ -48,6 +49,9 @@ export default new Vuex.Store({
     },
     setInitFirstMusic (state, payload) {
       state.initFirstMusic = payload;
+    },
+    setLoadingNewMusicIndex (state, payload) {
+      state.loadingNewMusicIndex = payload;
     }
   },
   getters: {
@@ -59,6 +63,7 @@ export default new Vuex.Store({
     allowToPlay: state => state.allowToPlay,
     musicState: state => state.musicState,
     musicToDelete: state => state.musicToDelete,
-    initFirstMusic: state => state.initFirstMusic
+    initFirstMusic: state => state.initFirstMusic,
+    loadingNewMusicIndex: state => state.loadingNewMusicIndex
   }
 })

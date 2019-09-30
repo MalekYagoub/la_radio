@@ -1,7 +1,7 @@
 <template>
-    <v-btn color="primary" dark @click="changeMusic" fab large>
-        <v-icon dark v-if="nextOrPrev === 'prev'">skip_previous</v-icon>
-        <v-icon dark v-else>skip_next</v-icon>
+    <v-btn color="primary" :disabled="disableButton" @click="changeMusic" fab large>
+        <v-icon v-if="nextOrPrev === 'prev'">skip_previous</v-icon>
+        <v-icon v-else>skip_next</v-icon>
     </v-btn>
 </template>
 
@@ -11,7 +11,10 @@ import { mapGetters } from 'vuex';
 export default {
     props: ['nextOrPrev'],
     computed: {
-        ...mapGetters(['socket', 'currentMusicIndex', 'musics'])
+        ...mapGetters(['socket', 'currentMusicIndex', 'musics', 'loadingNewMusicIndex']),
+        disableButton () {
+            return this.loadingNewMusicIndex !== null;
+        }
     },
     methods: {
         changeMusic () {

@@ -72,6 +72,10 @@ export default {
             this.$store.commit('setCurrentMusicIndex', music.index);
         });
 
+        this.socket.on('client_loadingNewMusic', (data) => {
+            this.$store.commit('setLoadingNewMusicIndex', data.index);
+        })
+
         this.socket.on('client_deleteMusic', (deletedMusicInfo) => {
             if (this.musics.length === 1) {
                 this.$store.commit('setInitFirstMusic', true);
