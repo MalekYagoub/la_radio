@@ -17,10 +17,11 @@
                 <v-col cols="auto">
                     <v-btn
                         @click="addMusic"
-                        :disabled="!isValid || loading"
+                        :disabled="!isValid || loading || userIsAddingMusic"
                         :loading="loading"
                         color="secondary">
-                        Ajouter
+                        <span v-if="!userIsAddingMusic">Ajouter</span>
+                        <span class="caption" v-else>Ajout en cours</span>
                     </v-btn>
                 </v-col>
             </v-row>
@@ -44,7 +45,8 @@ export default {
                 v => !!v || 'Url requise',
                 v => youtubeRegex().test(v) && v.split(' ').length === 1 || 'Entrez une url youtube valide'
             ],
-            loading: false
+            loading: false,
+            userIsAddingMusic: false // Un autre utilisateur ajoute une musique
         }
     },
     methods: {
@@ -63,6 +65,10 @@ export default {
             this.$store.commit('appendMusic', music);
             this.$store.commit('setSnackbar', {color: 'secondary', message: 'Une musique a été ajoutée'});
             this.loading = false;
+        });
+
+        this.socket.on('client_loadingAddMusic', (payload) => {
+            this.userIsAddingMusic = payload;
         });
     }
 }

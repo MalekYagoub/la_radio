@@ -1,37 +1,39 @@
 <template>
-    <v-card max-width="550" class="mx-auto">
-        <v-toolbar color="accent" dark>
-            <v-toolbar-title>Bibliothèque</v-toolbar-title>
-            <div class="flex-grow-1"></div>
+    <div class="musics-list-container">
+        <v-card max-width="550" class="mx-auto">
+            <v-toolbar color="accent" dark>
+                <v-toolbar-title>Bibliothèque</v-toolbar-title>
+                <div class="flex-grow-1"></div>
 
-            <v-text-field
-                class="mt-6"
-                prepend-icon="search"
-                label="Recherche"
-                dense
-                v-model="query"
-                style="width: 100px;"
-            ></v-text-field>
-        </v-toolbar>
+                <v-text-field
+                    class="mt-6"
+                    prepend-icon="search"
+                    label="Recherche"
+                    dense
+                    v-model="query"
+                    style="width: 100px;"
+                ></v-text-field>
+            </v-toolbar>
 
-        <v-list v-if="musics.length > 0" one-line class="musics-list">
-            <template v-for="(music, index) in computedMusicsList">
-                <MusicRow :music="music" :index="findMusicIndex(music)" :key="index"/>
-            </template>
-        </v-list>
-        <v-card-text v-else class="primary--text text-center font-weight-medium">
-            <div class="d-flex flex-column">
-                <span>Aucune musique n'est présente dans la bibliothèque</span>
-                <v-icon class="mt-2" x-large color="secondary">music_off</v-icon>
-            </div>
-        </v-card-text>
-        <v-card-text v-if="query.length > 0 && computedMusicsList.length === 0" class="primary--text text-center font-weight-medium">
-            <div class="d-flex flex-column">
-                <span>Aucune musique ne correspond à votre recherche</span>
-                <v-icon class="mt-2" x-large color="secondary">youtube_searched_for</v-icon>
-            </div>
-        </v-card-text>
-    </v-card>
+            <v-list v-if="musics.length > 0" one-line class="musics-list">
+                <template v-for="(music, index) in computedMusicsList">
+                    <MusicRow :music="music" :index="findMusicIndex(music)" :key="index"/>
+                </template>
+            </v-list>
+            <v-card-text v-else class="primary--text text-center font-weight-medium">
+                <div class="d-flex flex-column">
+                    <span>Aucune musique n'est présente dans la bibliothèque</span>
+                    <v-icon class="mt-2" x-large color="secondary">music_off</v-icon>
+                </div>
+            </v-card-text>
+            <v-card-text v-if="query.length > 0 && computedMusicsList.length === 0" class="primary--text text-center font-weight-medium">
+                <div class="d-flex flex-column">
+                    <span>Aucune musique ne correspond à votre recherche</span>
+                    <v-icon class="mt-2" x-large color="secondary">youtube_searched_for</v-icon>
+                </div>
+            </v-card-text>
+        </v-card>
+    </div>
 </template>
 
 <script>
@@ -121,6 +123,10 @@ export default {
 </script>
 
 <style scoped lang="scss">
+    .musics-list-container {
+        height: 445px;
+    }
+
     .musics-list {
         max-height: 380px;
         overflow-y: auto;

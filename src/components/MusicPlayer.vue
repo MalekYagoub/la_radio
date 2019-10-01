@@ -1,5 +1,5 @@
 <template>
-    <v-container v-if="howler && allowToPlay" class="music-player-container">
+    <v-container v-if="howler && allowToPlay">
         <v-row justify="center" align="end">
             <div class="d-inline-flex flex-column" style="width: 742px;">
                 <div class="d-inline-flex">
@@ -158,10 +158,6 @@ export default {
 </script>
 
 <style>
-    .music-player-container {
-        position: absolute;
-        bottom: 25px;
-    }
     .music-player {
         display: flex;
         flex-direction: column;
