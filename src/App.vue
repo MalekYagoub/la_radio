@@ -5,21 +5,51 @@
         <span>La Radio <v-icon>radio</v-icon></span>
       </v-toolbar-title>
       <v-spacer></v-spacer>
+      <v-tooltip left>
+        <template v-slot:activator="{ on }">
+          <v-badge
+            color="red darken-3"
+            right
+            overlap
+            class="mr-5"
+          >
+            <template v-slot:badge>{{usersConnected}}</template>
+            <v-icon
+              color="grey lighten-1"
+              large
+              v-on="on"
+            >
+              account_circle
+            </v-icon>
+          </v-badge>
+        </template>
+        <span>{{usersConnected}} utilisateur<template v-if="usersConnected > 1">s</template> sur LaRadio</span>
+      </v-tooltip>
     </v-app-bar>
 
     <Snack />
 
     <v-overlay
       :opacity="0.9"
-      :value="!$store.getters.allowToPlay"
+      :value="!$store.getters.allowToPlay || !$store.getters.playerLoaded"
       @click.native="$store.commit('setAllowToPlay', true)"
     >
-      <v-container>
+      <v-container v-if="!$store.getters.allowToPlay">
         <v-row>
           <span class="title">Cliquez pour reprendre la diffusion</span>
         </v-row>
         <v-row class="mt-5" justify="center">
           <v-icon x-large>blur_on</v-icon>
+        </v-row>
+      </v-container>
+      <v-container v-else>
+        <v-row justify="center" align="center">
+          <v-progress-circular
+            :size="70"
+            :width="7"
+            color="white"
+            indeterminate
+          ></v-progress-circular>
         </v-row>
       </v-container>
     </v-overlay>
@@ -58,7 +88,8 @@ export default {
   data () {
     return {
       base64Music: null,
-      musicSeconds: null
+      musicSeconds: null,
+      usersConnected: 0
     }
   },
   mounted () {
@@ -76,6 +107,10 @@ export default {
     const socket = io(process.env.VUE_APP_SERVER_URL);
     // On l'enregistre dans notre state pour ne pas le perdre
     this.$store.commit('setSocket', socket);
+
+    socket.on('client_usersConnected', (data) => {
+      this.usersConnected = data.usersConnected;
+    });
 
     // Récupérer toutes les data importantes (play / stop, volume, combien de secondes on en est)
     socket.emit('server_getMusics');

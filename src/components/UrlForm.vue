@@ -17,7 +17,7 @@
                 <v-col cols="auto">
                     <v-btn
                         @click="addMusic"
-                        :disabled="!isValid || loading || userIsAddingMusic"
+                        :disabled="!isValid || loading || userIsAddingMusicBoolean"
                         :loading="loading"
                         color="secondary">
                         <span v-if="!userIsAddingMusic">Ajouter</span>
@@ -35,7 +35,10 @@ import { mapGetters } from 'vuex';
 
 export default {
     computed: {
-        ...mapGetters(['socket', 'snackbar', 'musics'])
+        ...mapGetters(['socket', 'snackbar', 'musics']),
+        userIsAddingMusicBoolean () {
+            return this.userIsAddingMusic === 0 || !this.userIsAddingMusic ? false : true;
+        }
     },
     data () {
         return {
@@ -46,7 +49,7 @@ export default {
                 v => youtubeRegex().test(v) && v.split(' ').length === 1 || 'Entrez une url youtube valide'
             ],
             loading: false,
-            userIsAddingMusic: false // Un autre utilisateur ajoute une musique
+            userIsAddingMusic: 0, // Un autre utilisateur ajoute une musique
         }
     },
     methods: {

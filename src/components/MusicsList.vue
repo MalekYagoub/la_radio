@@ -70,8 +70,10 @@ export default {
     mounted () {
         if (this.musics.length > 0 && this.currentMusicIndex) this.socket.emit('server_getCurrentMusic');
         this.socket.on('client_getCurrentMusic', (music) => {
+            // ON coupe le chargment du player dans l'overlay quand on recoit la musique
+            if (!this.$store.getters.playerLoaded) this.$store.commit('setPlayerLoaded', true);
             this.$store.commit('setCurrentMusic', music.base64Music);
-            this.$store.commit('setCurrentMusicIndex', music.index);
+            if (this.currentMusicIndex !== music.index) this.$store.commit('setCurrentMusicIndex', music.index);
         });
 
         this.socket.on('client_loadingNewMusic', (data) => {
@@ -116,6 +118,9 @@ export default {
         currentMusicIndex (newVal, oldVal) {
             if (!oldVal && this.musics.length > 0 && !this.initFirstMusic) {
                 this.socket.emit('server_getCurrentMusic');
+            } else {
+                // Si on rentre là, on n'a pas de musique à charger donc on coupe le chargement de l'overlay
+                this.$store.commit('setPlayerLoaded', true);
             }
         }
     }
