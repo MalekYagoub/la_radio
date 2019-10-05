@@ -34,7 +34,7 @@
             <v-menu bottom right transition="scale-transition">
                 <template v-slot:activator="{ on }">
                 <v-btn
-                    color="secondary"
+                    color="primary"
                     icon
                     v-on="on"
                 >
@@ -91,7 +91,7 @@ export default {
         selectMusicToPlay (index) {
             if (index !== this.currentMusicIndex) {
                 // on entre dans ce if uniquement si on souhaite jouer une musique différente de celle qui a été joué la derniere fois avec les thumbnails
-                this.socket.emit('server_changeCurrentMusic', index);
+                this.socket.emit('server_changeCurrentMusic', index, true);
             } else {
                 // reprendre la lecture de la musique en cours
                 this.socket.emit('server_setMusicState', 'play');

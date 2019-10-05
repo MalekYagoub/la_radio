@@ -16,10 +16,20 @@
                         </v-col>
                         <v-col cols="auto">
                             <div class="d-flex align-center">
-                                <NextPrevMusicButton nextOrPrev="prev" class="mx-4"/>
-                                <PlayMusicButton :howler="howler" class="mx-4"/>
-                                <NextPrevMusicButton nextOrPrev="next" class="mx-4"/>
-                                <MusicVolume :volume="volume" @changeVolume="changeVolume"/>
+                                <NextPrevMusicButton nextOrPrev="prev" class="mx-2"/>
+                                <PlayMusicButton :howler="howler" class="mx-2"/>
+                                <NextPrevMusicButton nextOrPrev="next" class="mx-2"/>
+                                <div class="pl-1">
+                                    <v-tooltip right>
+                                        <template v-slot:activator="{ on }">
+                                            <v-btn v-on="on" @click="setRandomState" icon :color="randomState === 0 ? 'primary' : 'teal darken-2'">
+                                                <v-icon>shuffle</v-icon>
+                                            </v-btn>
+                                        </template>
+                                        <span>Lecture aléatoire {{randomState === 0 ? 'désactivé' : 'activé'}}</span>
+                                    </v-tooltip>
+                                    <MusicVolume class="pl-2" :volume="volume" @changeVolume="changeVolume"/>
+                                </div>
                             </div>
                         </v-col>
                     </div>
@@ -57,6 +67,7 @@ export default {
             musicSliderPosition: null,
             lastMusicInfo: null,
             volume: 1,
+            randomState: 0,
             getMusicStateHandler: () => {}
         }
     },
@@ -75,6 +86,9 @@ export default {
         changeVolume (volume) {
             this.volume = volume / 100;
             if (this.howler) this.howler.volume(this.volume);
+        },
+        setRandomState () {
+            this.socket.emit('server_setRandomState');
         }
     },
     mounted () {
@@ -109,10 +123,15 @@ export default {
             this.howler.seek(currentMusicPosition / 1000);
         });
 
+        this.socket.on('client_setRandomState', (randomStateValue) => {
+            this.randomState = randomStateValue;
+        });
+
         const vm = this;
         this.socket.emit('server_getMusicState');
         this.getMusicStateHandler = (currentMusicInfo) => {
             vm.musicSliderPosition = currentMusicInfo.currentMusicPosition;
+            vm.randomState = currentMusicInfo.randomState;
             if (currentMusicInfo.musicState === 'play' && !vm.allowedToGetMusicState && !vm.initFirstMusic) {
                 vm.$store.commit('setAllowToPlay', false);
             } else {

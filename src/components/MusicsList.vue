@@ -1,8 +1,13 @@
 <template>
     <div class="musics-list-container">
         <v-card max-width="550" class="mx-auto">
-            <v-toolbar color="accent" dark>
-                <v-toolbar-title>Bibliothèque</v-toolbar-title>
+            <v-toolbar color="secondary" dark>
+                <v-toolbar-title>
+                    Bibliothèque
+                    <span class="white--text overline font-weight-bold">
+                        ({{musics.length}})
+                    </span>
+                </v-toolbar-title>
                 <div class="flex-grow-1"></div>
 
                 <v-text-field
@@ -92,13 +97,10 @@ export default {
                     this.$store.commit('setCurrentMusicIndex', null);
                     this.$store.commit('setSnackbar', {color: 'secondary', message: 'Une musique a été supprimée'});
                 } else {
-                    let indexToPass = this.currentMusicIndex === this.musics.length - 1 ? 0 : this.currentMusicIndex + 1;
-                    if (this.currentMusicIndex < this.musics.length - 1) {
-                        indexToPass--;
-                    }
+                    let indexToPass = this.currentMusicIndex === this.musics.length - 1 ? 0 : this.currentMusicIndex;
 
                     this.$store.commit('setMusicToDelete', deletedMusicInfo);
-                    this.socket.emit('server_changeCurrentMusic', indexToPass);
+                    this.socket.emit('server_changeCurrentMusic', indexToPass, false, null, true);
                 }
             } else {
                 // Décrementer l'index de 1 pour garder la même musique en cours
@@ -129,7 +131,7 @@ export default {
 
 <style scoped lang="scss">
     .musics-list-container {
-        height: 445px;
+        height: 465px;
     }
 
     .musics-list {

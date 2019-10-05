@@ -21,7 +21,7 @@ export default {
             let indexToPass;
             if (this.nextOrPrev === 'prev' ) {
                 indexToPass = this.currentMusicIndex === 0 ? this.musics.length - 1 : this.currentMusicIndex - 1;
-                this.socket.emit('server_changeCurrentMusic', indexToPass);
+                this.socket.emit('server_changeCurrentMusic', indexToPass, false, 'prev');
             } else {
                 indexToPass = this.currentMusicIndex === this.musics.length - 1 ? 0 : this.currentMusicIndex + 1;
                 this.socket.emit('server_changeCurrentMusic', indexToPass);
