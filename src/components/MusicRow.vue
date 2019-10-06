@@ -47,6 +47,10 @@
                         <v-list-item-icon><v-icon color="secondary">playlist_add</v-icon></v-list-item-icon>
                         <v-list-item-title>Ajouter à la playlist</v-list-item-title>
                     </v-list-item>
+                    <v-list-item>
+                        <v-list-item-icon><v-icon color="secondary">star_border</v-icon></v-list-item-icon>
+                        <v-list-item-title>Ajouter aux favoris</v-list-item-title>
+                    </v-list-item>
                     <v-list-item @click="showDeleteModal = true">
                         <v-list-item-icon><v-icon color="#b30000">delete</v-icon></v-list-item-icon>
                         <v-list-item-title>Supprimer la musique</v-list-item-title>

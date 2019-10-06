@@ -11,8 +11,8 @@
                         </v-card>
                     </v-col>
                     <div class="d-flex flex-column">
-                        <v-col cols="auto">
-                            <span class="title font-weight-medium">{{musics[currentMusicIndex].videoTitle}}</span>
+                        <v-col :class="{'text-box': videoTitleWidth >= 438}" cols="auto">
+                            <span ref="musicTitle" class="title font-weight-medium">{{musics[currentMusicIndex].videoTitle}}</span>
                         </v-col>
                         <v-col cols="auto">
                             <div class="d-flex align-center">
@@ -20,14 +20,19 @@
                                 <PlayMusicButton :howler="howler" class="mx-2"/>
                                 <NextPrevMusicButton nextOrPrev="next" class="mx-2"/>
                                 <div class="pl-1">
-                                    <v-tooltip right>
-                                        <template v-slot:activator="{ on }">
-                                            <v-btn v-on="on" @click="setRandomState" icon :color="randomState === 0 ? 'primary' : 'teal darken-2'">
-                                                <v-icon>shuffle</v-icon>
-                                            </v-btn>
-                                        </template>
-                                        <span>Lecture aléatoire {{randomState === 0 ? 'désactivé' : 'activé'}}</span>
-                                    </v-tooltip>
+                                    <div>
+                                        <v-tooltip right>
+                                            <template v-slot:activator="{ on }">
+                                                <v-btn v-on="on" @click="setRandomState" icon :color="randomState === 0 ? 'primary' : 'teal darken-2'">
+                                                    <v-icon>shuffle</v-icon>
+                                                </v-btn>
+                                            </template>
+                                            <span>Lecture aléatoire {{randomState === 0 ? 'désactivé' : 'activé'}}</span>
+                                        </v-tooltip>
+                                        <v-btn class="ml-1" icon color="secondary">
+                                            <v-icon>star_border</v-icon>
+                                        </v-btn>
+                                    </div>
                                     <MusicVolume class="pl-2" :volume="volume" @changeVolume="changeVolume"/>
                                 </div>
                             </div>
@@ -55,7 +60,7 @@ export default {
         PlayMusicButton,
         NextPrevMusicButton,
         MusicSlider,
-        MusicVolume
+        MusicVolume,
     },
     computed: {
         ...mapGetters(['socket', 'currentMusic', 'allowToPlay', 'musicState', 'musics', 'currentMusicIndex', 'initFirstMusic'])
@@ -68,7 +73,8 @@ export default {
             lastMusicInfo: null,
             volume: 1,
             randomState: 0,
-            getMusicStateHandler: () => {}
+            getMusicStateHandler: () => {},
+            videoTitleWidth: null // contient la largeur du titre pour savoir si on doit le faire scroll horizontalement ou pas
         }
     },
     methods: {
@@ -85,7 +91,7 @@ export default {
         },
         changeVolume (volume) {
             this.volume = volume / 100;
-            if (this.howler) this.howler.volume(this.volume);
+            if (this.howler) this.howler.volume(this.volume * this.volume);
         },
         setRandomState () {
             this.socket.emit('server_setRandomState');
@@ -140,6 +146,9 @@ export default {
             }
         }
         this.socket.on('client_getMusicState', this.getMusicStateHandler);
+        this.$nextTick(() => {
+            this.videoTitleWidth = this.$refs.musicTitle.offsetWidth;
+        })
     },
     beforeDestroy () {
         // A chaque fois qu'on destroy le player, on enlève l'écoute du getMusicState, pour ne pas accumuler les écoutes
@@ -154,6 +163,10 @@ export default {
             }
         },
         currentMusic () {
+            this.$nextTick(() => {
+                this.videoTitleWidth = this.$refs.musicTitle.offsetWidth;
+            })
+
             if (this.howler) this.howler.unload();
             let sound = new Howl({
                 src: ['data:audio/mp3;base64,' + this.currentMusic],
@@ -176,9 +189,33 @@ export default {
 }
 </script>
 
-<style>
+<style lang="scss" scoped>
     .music-player {
         display: flex;
         flex-direction: column;
+    }
+
+    .text-box {
+        width: 450px;
+        height: 30px;
+        overflow: hidden;
+        line-height: 30px;
+        padding: 0;
+        margin-top: 12px;
+        margin-bottom: 14px;
+        padding-left: 12px;
+        position: relative;
+    }
+
+    .text-box span {
+        position: absolute;
+        white-space: nowrap;
+        transform: translateX(0);
+        display: inline;
+    }
+
+    .text-box:hover span {
+        transition: 5s;
+        transform: translateX(calc(200px - 70%));
     }
 </style>

@@ -131,7 +131,7 @@ export default {
 
 <style scoped lang="scss">
     .musics-list-container {
-        height: 465px;
+        height: 445px;
     }
 
     .musics-list {
