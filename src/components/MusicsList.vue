@@ -1,7 +1,7 @@
 <template>
     <div class="musics-list-container">
-        <v-card max-width="550" class="mx-auto">
-            <v-toolbar color="secondary" dark>
+        <v-card class="mx-auto">
+            <v-toolbar height="64" color="secondary" dark>
                 <v-toolbar-title>
                     Bibliothèque
                     <span class="white--text overline font-weight-bold">

@@ -23,7 +23,7 @@
                                     <div>
                                         <v-tooltip right>
                                             <template v-slot:activator="{ on }">
-                                                <v-btn v-on="on" @click="setRandomState" icon :color="randomState === 0 ? 'primary' : 'teal darken-2'">
+                                                <v-btn v-on="on" @click="setRandomState" icon :color="randomState === 0 ? 'primary' : 'accent'">
                                                     <v-icon>shuffle</v-icon>
                                                 </v-btn>
                                             </template>
@@ -170,7 +170,7 @@ export default {
             if (this.howler) this.howler.unload();
             let sound = new Howl({
                 src: ['data:audio/mp3;base64,' + this.currentMusic],
-                volume: this.volume
+                volume: this.volume * this.volume
             });
             this.howler = sound;
 

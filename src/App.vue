@@ -57,7 +57,14 @@
     <v-content v-if="$store.getters.socket">
       <UrlForm/>
       <v-container>
-        <MusicsList/>
+        <v-row justify="center">
+          <v-col sm="12" md="3">
+            <MusicsList/>
+          </v-col>
+          <v-col sm="12" md="4">
+            <PlaylistsList />
+          </v-col>
+        </v-row>
       </v-container>
       <template v-if="$store.getters.currentMusic">
         <MusicPlayer class="mt-6"/>
@@ -70,6 +77,7 @@
 import UrlForm from '@/components/UrlForm';
 import Snack from '@/components/shared/Snack';
 import MusicsList from '@/components/MusicsList';
+import PlaylistsList from '@/components/PlaylistsList';
 import io from 'socket.io-client';
 import MusicPlayer from '@/components/MusicPlayer';
 import { mapGetters } from 'vuex';
@@ -80,6 +88,7 @@ export default {
     UrlForm,
     Snack,
     MusicsList,
+    PlaylistsList,
     MusicPlayer
   },
   computed: {
@@ -96,12 +105,12 @@ export default {
     // Light theme
     this.$vuetify.theme.themes.light.primary = '#363237';
     this.$vuetify.theme.themes.light.secondary = '#2D4262';
-    this.$vuetify.theme.themes.light.accent = '#655450';
+    this.$vuetify.theme.themes.light.accent = '#00796B';
 
     // Dark theme
     this.$vuetify.theme.themes.dark.primary = '#363237';
     this.$vuetify.theme.themes.dark.secondary = '#2D4262';
-    this.$vuetify.theme.themes.dark.accent = '#655450';
+    this.$vuetify.theme.themes.dark.accent = '#00796B';
 
     // On crée notre socket
     const socket = io(process.env.VUE_APP_SERVER_URL);

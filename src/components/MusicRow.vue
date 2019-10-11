@@ -22,7 +22,7 @@
             </div>
 
             <v-list-item-content>
-                <v-list-item-title :class="{ 'secondary--text font-weight-medium': index === currentMusicIndex }" v-html="music.videoTitle"></v-list-item-title>
+                <v-list-item-title :class="{ 'accent--text font-weight-medium': index === currentMusicIndex }" v-html="music.videoTitle"></v-list-item-title>
                 <v-list-item-subtitle class="flex-center">
                     <v-icon small color="grey">access_time</v-icon>
                     <span class="grey--text ml-1">
