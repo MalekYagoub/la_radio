@@ -2,7 +2,7 @@
     <div class="musics-list-container">
         <v-card class="mx-auto">
             <v-toolbar height="64" color="secondary" dark>
-                <v-toolbar-title>
+                <v-toolbar-title class="pl-4">
                     Bibliothèque
                     <span class="white--text overline font-weight-bold">
                         ({{musics.length}})
@@ -11,7 +11,7 @@
                 <div class="flex-grow-1"></div>
 
                 <v-text-field
-                    class="mt-6"
+                    class="mt-6 pr-4"
                     prepend-icon="search"
                     label="Recherche"
                     dense

@@ -7,6 +7,7 @@ export default new Vuex.Store({
   state: {
     socket: null,
     musics: [],
+    playlists: [],
     currentMusic: null,
     currentMusicIndex: null,
     snackbar: null,
@@ -24,8 +25,14 @@ export default new Vuex.Store({
     setMusics (state, payload) {
       state.musics = payload;
     },
+    setPlaylists (state, payload) {
+      state.playlists = payload;
+    },
     appendMusic (state, payload) {
       state.musics.push(payload);
+    },
+    appendPlaylist (state, payload) {
+      state.playlists.push(payload);
     },
     deleteMusic (state, payload) {
       state.musics.splice(payload.index, 1);
@@ -61,6 +68,7 @@ export default new Vuex.Store({
   getters: {
     socket: state => state.socket,
     musics: state => state.musics,
+    playlists: state => state.playlists,
     snackbar: state => state.snackbar,
     currentMusic: state => state.currentMusic,
     currentMusicIndex: state => state.currentMusicIndex,

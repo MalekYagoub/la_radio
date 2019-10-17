@@ -58,10 +58,10 @@
       <UrlForm/>
       <v-container>
         <v-row justify="center">
-          <v-col sm="12" md="3">
+          <v-col sm="12" lg="4" xl="3">
             <MusicsList/>
           </v-col>
-          <v-col sm="12" md="4">
+          <v-col sm="12" lg="6" xl="4">
             <PlaylistsList />
           </v-col>
         </v-row>
@@ -105,12 +105,12 @@ export default {
     // Light theme
     this.$vuetify.theme.themes.light.primary = '#363237';
     this.$vuetify.theme.themes.light.secondary = '#2D4262';
-    this.$vuetify.theme.themes.light.accent = '#00796B';
+    this.$vuetify.theme.themes.light.accent = '#00ac98';
 
     // Dark theme
     this.$vuetify.theme.themes.dark.primary = '#363237';
     this.$vuetify.theme.themes.dark.secondary = '#2D4262';
-    this.$vuetify.theme.themes.dark.accent = '#00796B';
+    this.$vuetify.theme.themes.dark.accent = '#00ac98';
 
     // On crée notre socket
     const socket = io(process.env.VUE_APP_SERVER_URL);
@@ -121,10 +121,14 @@ export default {
       this.usersConnected = data.usersConnected;
     });
 
-    // Récupérer toutes les data importantes (play / stop, volume, combien de secondes on en est)
     socket.emit('server_getMusics');
     socket.on('client_getMusics', (musics) => {
       this.$store.commit('setMusics', musics);
+    });
+
+    socket.emit('server_getPlaylists');
+    socket.on('client_getPlaylists', (playlists) => {
+      this.$store.commit('setPlaylists', playlists);
     });
 
     socket.emit('server_getCurrentMusicIndex');
