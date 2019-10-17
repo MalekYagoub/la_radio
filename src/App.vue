@@ -13,7 +13,7 @@
             overlap
             class="mr-5"
           >
-            <template v-slot:badge>{{usersConnected}}</template>
+            <template v-slot:badge>{{usersCount}}</template>
             <v-icon
               color="grey lighten-1"
               large
@@ -23,7 +23,7 @@
             </v-icon>
           </v-badge>
         </template>
-        <span>{{usersConnected}} utilisateur<template v-if="usersConnected > 1">s</template> sur LaRadio</span>
+        <span>{{usersCount}} utilisateur<template v-if="usersCount > 1">s</template> sur LaRadio</span>
       </v-tooltip>
     </v-app-bar>
 
@@ -92,13 +92,13 @@ export default {
     MusicPlayer
   },
   computed: {
-    ...mapGetters(['musicToDelete', 'currentMusic'])
+    ...mapGetters(['musicToDelete', 'currentMusic', 'sessionId'])
   },
   data () {
     return {
       base64Music: null,
       musicSeconds: null,
-      usersConnected: 0
+      usersCount: 0
     }
   },
   mounted () {
@@ -117,8 +117,17 @@ export default {
     // On l'enregistre dans notre state pour ne pas le perdre
     this.$store.commit('setSocket', socket);
 
-    socket.on('client_usersConnected', (data) => {
-      this.usersConnected = data.usersConnected;
+    socket.on('client_usersCount', (data) => {
+      console.log(data);
+      this.usersCount = data.usersCount;
+      if (data.type === 'disconnection') {
+        this.$store.commit('setShouldAutoSkip', this.sessionId === data.autoSkipClientId);
+      }
+    });
+
+    socket.on('client_userConnection', (data) => {
+      this.$store.commit('setSessionId', data.clientId);
+      this.$store.commit('setShouldAutoSkip', data.clientId === data.autoSkipClientId);
     });
 
     socket.emit('server_getMusics');

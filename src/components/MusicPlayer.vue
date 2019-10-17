@@ -63,7 +63,7 @@ export default {
         MusicVolume,
     },
     computed: {
-        ...mapGetters(['socket', 'currentMusic', 'allowToPlay', 'musicState', 'musics', 'currentMusicIndex', 'initFirstMusic'])
+        ...mapGetters(['socket', 'currentMusic', 'allowToPlay', 'musicState', 'musics', 'currentMusicIndex', 'initFirstMusic', 'shouldAutoSkip'])
     },
     data () {
         return {
@@ -105,9 +105,10 @@ export default {
         this.howler = sound;
 
         this.howler.on('end', () => {
-            // const indexToPass = this.currentMusicIndex === this.musics.length - 1 ? 0 : this.currentMusicIndex + 1;
-            const indexToPass = (this.currentMusicIndex + 1) % (this.musics.length);
-            this.socket.emit('server_changeCurrentMusic', indexToPass);
+            if (this.shouldAutoSkip) {
+                const indexToPass = (this.currentMusicIndex + 1) % (this.musics.length);
+                this.socket.emit('server_changeCurrentMusic', indexToPass);
+            }
         });
 
         this.socket.on('client_setMusicState', (currentMusicInfo) => {
@@ -175,9 +176,10 @@ export default {
             this.howler = sound;
 
             this.howler.on('end', () => {
-                // const indexToPass = this.currentMusicIndex === this.musics.length - 1 ? 0 : this.currentMusicIndex + 1;
-                const indexToPass = (this.currentMusicIndex + 1) % (this.musics.length);
-                this.socket.emit('server_changeCurrentMusic', indexToPass);
+                if (this.shouldAutoSkip) {
+                    const indexToPass = (this.currentMusicIndex + 1) % (this.musics.length);
+                    this.socket.emit('server_changeCurrentMusic', indexToPass);
+                }
             });
 
             this.playPauseHowler({

@@ -6,6 +6,7 @@ Vue.use(Vuex)
 export default new Vuex.Store({
   state: {
     socket: null,
+    sessionId: null,
     musics: [],
     playlists: [],
     currentMusic: null,
@@ -16,11 +17,15 @@ export default new Vuex.Store({
     musicToDelete: null,
     initFirstMusic: false,
     loadingNewMusicIndex: null,
-    playerLoaded: false
+    playerLoaded: false,
+    shouldAutoSkip: false,
   },
   mutations: {
     setSocket (state, payload) {
       state.socket = payload;
+    },
+    setSessionId (state, payload) {
+      state.sessionId = payload;
     },
     setMusics (state, payload) {
       state.musics = payload;
@@ -63,10 +68,14 @@ export default new Vuex.Store({
     },
     setPlayerLoaded (state, payload) {
       state.playerLoaded = payload;
+    },
+    setShouldAutoSkip (state, payload) {
+      state.shouldAutoSkip = payload;
     }
   },
   getters: {
     socket: state => state.socket,
+    sessionId: state => state.sessionId,
     musics: state => state.musics,
     playlists: state => state.playlists,
     snackbar: state => state.snackbar,
@@ -77,6 +86,7 @@ export default new Vuex.Store({
     musicToDelete: state => state.musicToDelete,
     initFirstMusic: state => state.initFirstMusic,
     loadingNewMusicIndex: state => state.loadingNewMusicIndex,
-    playerLoaded: state => state.playerLoaded
+    playerLoaded: state => state.playerLoaded,
+    shouldAutoSkip: state => state.shouldAutoSkip
   }
 })
