@@ -39,8 +39,14 @@ export default new Vuex.Store({
     appendPlaylist (state, payload) {
       state.playlists.push(payload);
     },
+    editPlaylist (state, payload) {
+      state.playlists[payload.index].title = payload.title;
+    },
     deleteMusic (state, payload) {
       state.musics.splice(payload.index, 1);
+    },
+    deletePlaylist (state, payload) {
+      state.playlists.splice(payload.index, 1);
     },
     setSnackbar (state, payload) {
       state.snackbar = payload;

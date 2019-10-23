@@ -1,6 +1,6 @@
 <template>
     <v-hover v-slot:default="{ hover }">
-        <v-list-item :class="{ 'music-row--selected': index === currentMusicIndex }">
+        <v-list-item :class="{ 'music-row': true, 'ml-5': index === currentMusicIndex, 'music-row--selected': index === currentMusicIndex }">
             <div style="width: 46px; margin-right: 24px;">
                 <v-progress-circular
                     v-show="loadingNewMusicIndex !== null && loadingNewMusicIndex === index"
@@ -132,8 +132,12 @@ export default {
         opacity: 1;
     }
 
-    .music-row--selected {
+    .music-row {
         transition: 0.3s all;
+    }
+
+    .music-row--selected {
         background-color: #EEEEEE;
+        border-radius: 15px 0 0 15px !important;
     }
 </style>

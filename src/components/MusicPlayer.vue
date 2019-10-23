@@ -168,7 +168,9 @@ export default {
                 this.videoTitleWidth = this.$refs.musicTitle.offsetWidth;
             })
 
-            if (this.howler) this.howler.unload();
+            if (this.howler)  {
+                this.howler.unload();
+            }
             let sound = new Howl({
                 src: ['data:audio/mp3;base64,' + this.currentMusic],
                 volume: this.volume * this.volume

@@ -118,7 +118,6 @@ export default {
     this.$store.commit('setSocket', socket);
 
     socket.on('client_usersCount', (data) => {
-      console.log(data);
       this.usersCount = data.usersCount;
       if (data.type === 'disconnection') {
         this.$store.commit('setShouldAutoSkip', this.sessionId === data.autoSkipClientId);
