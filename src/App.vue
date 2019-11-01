@@ -92,7 +92,7 @@ export default {
     MusicPlayer
   },
   computed: {
-    ...mapGetters(['musicToDelete', 'currentMusic', 'sessionId'])
+    ...mapGetters(['lastCurrentMusicToDelete', 'currentMusic', 'sessionId'])
   },
   data () {
     return {
@@ -157,10 +157,11 @@ export default {
       this.$store.commit('setCurrentMusic', music.base64Music);
       this.$store.commit('setCurrentMusicIndex', music.index);
 
-      if (this.musicToDelete) {
-        this.$store.commit('deleteMusic', this.musicToDelete);
+      if (this.lastCurrentMusicToDelete) {
+        this.$store.commit('deleteMusic', this.lastCurrentMusicToDelete);
+        this.$store.commit('deleteMusicFromPlaylists', this.lastCurrentMusicToDelete);
         this.$store.commit('setSnackbar', {color: 'secondary', message: 'Une musique a été supprimée'});
-        this.$store.commit('setMusicToDelete', null);
+        this.$store.commit('setLastCurrentMusicToDelete', null);
       }
     });
   }

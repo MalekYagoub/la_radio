@@ -93,18 +93,20 @@ export default {
             if (this.currentMusicIndex === deletedMusicInfo.index) {
                 if (this.musics.length === 1) {
                     this.$store.commit('deleteMusic', deletedMusicInfo);
+                    this.$store.commit('deleteMusicFromPlaylists', deletedMusicInfo);
                     this.$store.commit('setCurrentMusic', null);
                     this.$store.commit('setCurrentMusicIndex', null);
                     this.$store.commit('setSnackbar', {color: 'secondary', message: 'Une musique a été supprimée'});
                 } else {
                     let indexToPass = this.currentMusicIndex === this.musics.length - 1 ? 0 : this.currentMusicIndex;
 
-                    this.$store.commit('setMusicToDelete', deletedMusicInfo);
+                    this.$store.commit('setLastCurrentMusicToDelete', deletedMusicInfo);
                     this.socket.emit('server_changeCurrentMusic', indexToPass, false, null, true);
                 }
             } else {
                 // Décrementer l'index de 1 pour garder la même musique en cours
                 this.$store.commit('deleteMusic', deletedMusicInfo);
+                this.$store.commit('deleteMusicFromPlaylists', deletedMusicInfo);
                 if (this.currentMusicIndex > deletedMusicInfo.index) {
                     this.$store.commit('setCurrentMusicIndex', this.currentMusicIndex - 1);
                 }
@@ -114,6 +116,15 @@ export default {
 
         this.socket.on('client_deleteMusicError', (message) => {
             this.$store.commit('setSnackbar', {color: "error", message});
+        });
+
+        this.socket.on('client_addedMusicToPlaylists', (data) => {
+            this.$store.commit('addPlaylistToMusic', data);
+            this.$store.commit('addMusicToPlaylists', data);
+        });
+        // event pour fermer la modal d'ajout de musiques à des playlists uniquement au client qui à fait l'ajout
+        this.socket.on('client_closeAddMusicToPlaylistsModal', () => {
+            this.$store.commit('setCloseAddMusicToPlaylistsModal', true);
         });
     },
     watch: {

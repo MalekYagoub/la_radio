@@ -43,9 +43,9 @@
                 </template>
 
                 <v-list flat dense>
-                    <v-list-item>
+                    <v-list-item @click="showAddToPlaylistsModal = true">
                         <v-list-item-icon><v-icon color="secondary">playlist_add</v-icon></v-list-item-icon>
-                        <v-list-item-title>Ajouter à la playlist</v-list-item-title>
+                        <v-list-item-title>Ajouter à une playlist</v-list-item-title>
                     </v-list-item>
                     <v-list-item>
                         <v-list-item-icon><v-icon color="secondary">star_border</v-icon></v-list-item-icon>
@@ -68,6 +68,30 @@
                     </v-card-actions>
                 </v-card>
             </v-dialog>
+
+            <v-dialog v-model="showAddToPlaylistsModal" max-width="290">
+                <v-card>
+                    <v-card-title class="subtitle-1">Enregistrer dans</v-card-title>
+                    <v-card-text style="max-height: 300px; overflow: auto;">
+                        <v-checkbox
+                            v-for="playlist in playlists"
+                            hide-details
+                            color="secondary"
+                            dense
+                            v-model="selectedPlaylists"
+                            :disabled="music.playlists[playlist.id] !== undefined"
+                            :indeterminate="music.playlists[playlist.id] !== undefined"
+                            :key="playlist.id"
+                            :label="playlist.title"
+                            :value="playlist" />
+                    </v-card-text>
+                    <v-card-actions>
+                        <div class="flex-grow-1"></div>
+                        <v-btn color="secondary" text @click="showAddToPlaylistsModal = false">Annuler</v-btn>
+                        <v-btn color="secondary" text @click="addMusicToPlaylists">Valider</v-btn>
+                    </v-card-actions>
+                </v-card>
+            </v-dialog>
         </v-list-item>
     </v-hover>
 </template>
@@ -79,11 +103,14 @@ export default {
     props: ['music', 'index'],
     data () {
         return {
-            showDeleteModal: false
+            showDeleteModal: false,
+            showAddToPlaylistsModal: false,
+            isRowAddingMusicToPlaylists: false,
+            selectedPlaylists: []
         }
     },
     computed: {
-        ...mapGetters(['socket', 'musicState', 'currentMusicIndex', 'musics', 'loadingNewMusicIndex']),
+        ...mapGetters(['socket', 'musicState', 'currentMusicIndex', 'musics', 'playlists', 'loadingNewMusicIndex', 'closeAddMusicToPlaylistsModal']),
         minutesAndSeconds () {
             const minutes = Math.floor(this.music.duration / 60);
             let seconds = this.music.duration % 60;
@@ -107,6 +134,22 @@ export default {
         deleteMusic () {
             this.socket.emit('server_deleteMusic', this.index);
             this.showDeleteModal = false;
+        },
+        addMusicToPlaylists () {
+            this.isRowAddingMusicToPlaylists = true;
+            this.socket.emit('server_addMusicToPlaylists', {
+                music: this.music,
+                playlists: this.selectedPlaylists
+            });
+        }
+    },
+    watch: {
+        closeAddMusicToPlaylistsModal () {
+            if (this.closeAddMusicToPlaylistsModal && this.isRowAddingMusicToPlaylists) {
+                this.showAddToPlaylistsModal = false;
+                this.isRowAddingMusicToPlaylists = false;
+                this.$store.commit('setCloseAddMusicToPlaylistsModal', false);
+            }
         }
     }
 }
@@ -138,6 +181,6 @@ export default {
 
     .music-row--selected {
         background-color: #EEEEEE;
-        border-radius: 15px 0 0 15px !important;
+        border-radius: 30px 0 0 30px !important;
     }
 </style>

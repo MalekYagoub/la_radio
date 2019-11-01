@@ -225,6 +225,7 @@ export default {
 
         this.socket.on('client_deletePlaylist', (deletedPlaylistInfo) => {
             this.$store.commit('setSnackbar', {color: 'secondary', message: 'Une playlist a été supprimée'});
+            this.$store.commit('deletePlaylistFromMusics', deletedPlaylistInfo);
             this.$store.commit('deletePlaylist', {index: deletedPlaylistInfo.index});
         });
 
