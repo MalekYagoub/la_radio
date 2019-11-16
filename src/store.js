@@ -11,6 +11,7 @@ export default new Vuex.Store({
     playlists: [],
     currentMusic: null,
     currentMusicIndex: null,
+    currentPlaylistId: null,
     snackbar: null,
     allowToPlay: true,
     musicState: 'pause',
@@ -109,6 +110,15 @@ export default new Vuex.Store({
           delete music.playlists[payload.playlist.id];
         }
       });
+    },
+    deleteMusicFromPlaylist (state, payload) {
+      const musicIndex = state.musics.findIndex((music) => payload.musicId === music.videoId);
+      const playlistIndex = state.playlists.findIndex((playlist) => payload.playlistId === playlist.id);
+      delete state.musics[musicIndex].playlists[payload.playlistId];
+      delete state.playlists[playlistIndex].musics[payload.musicId];
+    },
+    setCurrentPlaylistId (state, payload) {
+      state.currentPlaylistId = payload;
     }
   },
   getters: {
@@ -126,6 +136,11 @@ export default new Vuex.Store({
     loadingNewMusicIndex: state => state.loadingNewMusicIndex,
     playerLoaded: state => state.playerLoaded,
     shouldAutoSkip: state => state.shouldAutoSkip,
-    closeAddMusicToPlaylistsModal: state => state.closeAddMusicToPlaylistsModal
+    closeAddMusicToPlaylistsModal: state => state.closeAddMusicToPlaylistsModal,
+    currentPlaylistId: state => state.currentPlaylistId,
+    currentPlaylist (state) {
+      const playlistIndex = state.playlists.findIndex((playlist) => state.currentPlaylistId === playlist.id);
+      return state.playlists[playlistIndex];
+    }
   }
 })

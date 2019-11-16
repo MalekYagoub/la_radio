@@ -31,7 +31,18 @@
                 </v-list-item-subtitle>
             </v-list-item-content>
 
-            <v-menu bottom right transition="scale-transition">
+            <v-tooltip v-if="playlist" right>
+                <template v-slot:activator="{ on }">
+                    <v-list-item-action v-on="on">
+                        <v-btn icon @click="showDeleteMusicFromPlaylistModal = true">
+                            <v-icon color="grey">delete</v-icon>
+                        </v-btn>
+                    </v-list-item-action>
+                </template>
+                <span>Supprimer la musique de la playlist</span>
+            </v-tooltip>
+
+            <v-menu v-if="!playlist" bottom right transition="scale-transition">
                 <template v-slot:activator="{ on }">
                 <v-btn
                     color="primary"
@@ -42,7 +53,7 @@
                 </v-btn>
                 </template>
 
-                <v-list flat dense>
+                <v-list v-if="!playlist" flat dense>
                     <v-list-item @click="showAddToPlaylistsModal = true">
                         <v-list-item-icon><v-icon color="secondary">playlist_add</v-icon></v-list-item-icon>
                         <v-list-item-title>Ajouter à une playlist</v-list-item-title>
@@ -52,13 +63,13 @@
                         <v-list-item-title>Ajouter aux favoris</v-list-item-title>
                     </v-list-item>
                     <v-list-item @click="showDeleteModal = true">
-                        <v-list-item-icon><v-icon color="#b30000">delete</v-icon></v-list-item-icon>
+                        <v-list-item-icon><v-icon color="secondary">delete</v-icon></v-list-item-icon>
                         <v-list-item-title>Supprimer la musique</v-list-item-title>
                     </v-list-item>
                 </v-list>
             </v-menu>
 
-            <v-dialog v-model="showDeleteModal" max-width="290">
+            <v-dialog v-if="!playlist" v-model="showDeleteModal" max-width="290">
                 <v-card>
                     <v-card-title class="subtitle-1">Voulez vous vraiment supprimer cette musique ?</v-card-title>
                     <v-card-actions>
@@ -69,7 +80,7 @@
                 </v-card>
             </v-dialog>
 
-            <v-dialog v-model="showAddToPlaylistsModal" max-width="290">
+            <v-dialog v-if="!playlist" v-model="showAddToPlaylistsModal" max-width="290">
                 <v-card>
                     <v-card-title class="subtitle-1">Enregistrer dans</v-card-title>
                     <v-card-text style="max-height: 300px; overflow: auto;">
@@ -88,7 +99,18 @@
                     <v-card-actions>
                         <div class="flex-grow-1"></div>
                         <v-btn color="secondary" text @click="showAddToPlaylistsModal = false">Annuler</v-btn>
-                        <v-btn color="secondary" text @click="addMusicToPlaylists">Valider</v-btn>
+                        <v-btn color="secondary" :disabled="selectedPlaylists.length === 0" text @click="addMusicToPlaylists">Valider</v-btn>
+                    </v-card-actions>
+                </v-card>
+            </v-dialog>
+
+            <v-dialog v-if="playlist" v-model="showDeleteMusicFromPlaylistModal" max-width="290">
+                <v-card>
+                    <v-card-title class="subtitle-1">Voulez vous vraiment supprimer cette musique de la playlist ?</v-card-title>
+                    <v-card-actions>
+                        <div class="flex-grow-1"></div>
+                        <v-btn color="secondary" text @click="showDeleteMusicFromPlaylistModal = false">Annuler</v-btn>
+                        <v-btn color="secondary" text @click="deleteMusicFromPlaylist">Valider</v-btn>
                     </v-card-actions>
                 </v-card>
             </v-dialog>
@@ -100,17 +122,18 @@
 import { mapGetters } from 'vuex';
 
 export default {
-    props: ['music', 'index'],
+    props: ['music', 'index', 'playlist'],
     data () {
         return {
             showDeleteModal: false,
             showAddToPlaylistsModal: false,
             isRowAddingMusicToPlaylists: false,
+            showDeleteMusicFromPlaylistModal: false,
             selectedPlaylists: []
         }
     },
     computed: {
-        ...mapGetters(['socket', 'musicState', 'currentMusicIndex', 'musics', 'playlists', 'loadingNewMusicIndex', 'closeAddMusicToPlaylistsModal']),
+        ...mapGetters(['socket', 'musicState', 'currentMusicIndex', 'musics', 'playlists', 'loadingNewMusicIndex', 'closeAddMusicToPlaylistsModal', 'currentPlaylistId']),
         minutesAndSeconds () {
             const minutes = Math.floor(this.music.duration / 60);
             let seconds = this.music.duration % 60;
@@ -120,6 +143,13 @@ export default {
     },
     methods: {
         selectMusicToPlay (index) {
+            if (this.playlist) {
+                // On change la playlist en cours
+                this.socket.emit('server_changeCurrentPlaylistId', this.playlist.id);
+            } else {
+                this.socket.emit('server_changeCurrentPlaylistId', 0);
+            }
+
             if (index !== this.currentMusicIndex) {
                 // on entre dans ce if uniquement si on souhaite jouer une musique différente de celle qui a été joué la derniere fois avec les thumbnails
                 this.socket.emit('server_changeCurrentMusic', index, true);
@@ -141,6 +171,14 @@ export default {
                 music: this.music,
                 playlists: this.selectedPlaylists
             });
+            this.selectedPlaylists = [];
+        },
+        deleteMusicFromPlaylist () {
+            this.socket.emit('server_deleteMusicFromPlaylist', {
+                musicId: this.music.videoId,
+                playlistId: this.playlist.id
+            });
+            this.showDeleteMusicFromPlaylistModal = false;
         }
     },
     watch: {

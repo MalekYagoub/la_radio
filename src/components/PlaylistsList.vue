@@ -1,14 +1,14 @@
 <template>
     <v-card height="445" class="mx-auto">
-        <v-toolbar height="64" class="playlists-toolbar" color="secondary" style="z-index: 1;" dark>
-            <v-toolbar-title class="d-flex align-center justify-start">
+        <v-toolbar height="64" class="playlists-toolbar" color="secondary" style="z-index: 3;" dark>
+            <v-toolbar-title style="width: 100%;" class="d-flex align-center justify-space-between">
                 <v-slide-x-transition mode="out-in">
                     <div class="pl-3" style="display: inherit;" v-if="selectedPlaylist !== null">
                         <v-btn small class="mr-2" @click="unselectPlaylist" text icon>
                             <v-icon>arrow_back</v-icon>
                         </v-btn>
                         <div v-if="selectedPlaylist !== null">
-                            {{selectedPlaylist.title}}
+                            {{playlistTitleSliced}}
                         </div>
                     </div>
                     <span class="pl-4 playlists-label" v-else>
@@ -18,6 +18,11 @@
                         </span>
                     </span>
                 </v-slide-x-transition>
+                <v-fade-transition>
+                    <span class="selected-playlist-title" v-if="currentPlaylist">
+                        {{currentPlaylistTitleSliced}} - en cours
+                    </span>
+                </v-fade-transition>
             </v-toolbar-title>
             <template>
                 <v-fab-transition>
@@ -59,11 +64,18 @@
                     </v-col>
                 </v-row>
             </v-container> -->
-            <v-scale-transition group tag="div" style="width: 100%;" class="d-flex flex-wrap">
-                <div class="playlist-card-container"  v-for="playlist in playlists" :key="playlist.id">
-                    <PlaylistCard class="playlist-card" :playlist="playlist" @on-playlist-click="changeSelectedPlaylist" />
-                </div>
-            </v-scale-transition>
+            <v-fade-transition mode="out-in">
+                <v-scale-transition v-if="!selectedPlaylist" group tag="div" style="width: 100%;" class="d-flex flex-wrap">
+                    <div class="playlist-card-container"  v-for="playlist in playlists" :key="playlist.id">
+                        <PlaylistCard class="playlist-card" :playlist="playlist" @on-playlist-click="changeSelectedPlaylist" />
+                    </div>
+                </v-scale-transition>
+                <v-list v-else one-line class="musics-list">
+                    <template v-for="music in selectedPlaylist.musics">
+                        <MusicRow :music="music" :index="findMusicIndex(music)" :key="music.videoId" :playlist="selectedPlaylist"/>
+                    </template>
+                </v-list>
+            </v-fade-transition>
         </v-card-text>
 
         <v-dialog v-model="showAddPlaylistModal" max-width="400">
@@ -132,10 +144,12 @@
 import axios from 'axios';
 import { mapGetters } from 'vuex';
 import PlaylistCard from '@/components/PlaylistCard';
+import MusicRow from '@/components/MusicRow';
 
 export default {
     components: {
-        PlaylistCard
+        PlaylistCard,
+        MusicRow
     },
     data () {
         return {
@@ -157,7 +171,16 @@ export default {
         }
     },
     computed: {
-        ...mapGetters(['socket', 'playlists'])
+        ...mapGetters(['socket', 'playlists', 'musics', 'currentPlaylistId', 'currentPlaylist']),
+        currentPlaylistTitleSliced () {
+            if (this.currentPlaylist) {
+                return this.currentPlaylist.title.length > 12 ? this.currentPlaylist.title.slice(0, 12) + '...' : this.currentPlaylist.title;
+            }
+            return null;
+        },
+        playlistTitleSliced () {
+            return this.selectedPlaylist.title.length > 12 ? this.selectedPlaylist.title.slice(0, 12) + '...' : this.selectedPlaylist.title;
+        }
     },
     methods: {
         addPlaylist () {
@@ -190,7 +213,13 @@ export default {
             this.selectedPlaylist = null;
         },
         changeSelectedPlaylist (playlist) {
-            this.selectedPlaylist = playlist;
+            const playlistParsed = JSON.parse(JSON.stringify(playlist));
+            const playlistMusicsArr = [];
+            for (const musicIndex in playlistParsed.musics) {
+                playlistMusicsArr.push(playlistParsed.musics[musicIndex]);
+            }
+            this.selectedPlaylist = playlistParsed;
+            this.selectedPlaylist.musics = playlistMusicsArr;
         },
         unselectPlaylist () {
             this.selectedPlaylist = null;
@@ -203,7 +232,10 @@ export default {
         cancelEditPlaylist () {
             this.showEditModal = false;
             this.playlistTitle = '';
-        }
+        },
+        findMusicIndex (musicToCheck) {
+            return this.musics.findIndex((music) => musicToCheck.videoId === music.videoId);
+        },
     },
     mounted () {
         this.socket.on('client_addedPlaylist', (playlist) => {
@@ -224,6 +256,15 @@ export default {
         });
 
         this.socket.on('client_deletePlaylist', (deletedPlaylistInfo) => {
+            if (this.selectedPlaylist && this.selectedPlaylist.id === this.playlists[deletedPlaylistInfo.index].id) {
+                // on doit déselectionner la playlist car elle a été supprimée
+                this.selectedPlaylist = null;
+            }
+
+            if (deletedPlaylistInfo.currentPlaylistDeleted) {
+                this.$store.commit('setCurrentPlaylistId', null);
+            }
+
             this.$store.commit('setSnackbar', {color: 'secondary', message: 'Une playlist a été supprimée'});
             this.$store.commit('deletePlaylistFromMusics', deletedPlaylistInfo);
             this.$store.commit('deletePlaylist', {index: deletedPlaylistInfo.index});
@@ -242,7 +283,28 @@ export default {
                 index: data.index
             })
             this.$store.commit('setSnackbar', {color: 'secondary', message: 'Une playlist à été modifiée'});
-        })
+        });
+
+        this.socket.on('client_addedMusicToPlaylists', (data) => {
+            data.playlists.forEach((playlist) => {
+                if (this.selectedPlaylist && this.selectedPlaylist.id === playlist.id) {
+                    this.selectedPlaylist.musics.push(data.music);
+                }
+            });
+        });
+
+        this.socket.on('client_deletedMusicFromPlaylist', (data) => {
+            for (let i = 0; i < this.selectedPlaylist.musics.length; i++) {
+                if (this.selectedPlaylist.musics[i].videoId === data.musicId) {
+                    this.selectedPlaylist.musics.splice(i, 1);
+                }
+            }
+            this.$store.commit('deleteMusicFromPlaylist', data);
+        });
+
+        this.socket.on('client_changedCurrentPlaylistId', (playlistId) => {
+            this.$store.commit('setCurrentPlaylistId', playlistId);
+        });
     }
 }
 </script>
@@ -274,5 +336,14 @@ export default {
     .playlist-card {
         width: 170px;
         height: 150px;
+    }
+
+    .musics-list {
+        max-height: 380px;
+        overflow-y: auto;
+    }
+
+    .selected-playlist-title {
+        margin-right: 70px;
     }
 </style>

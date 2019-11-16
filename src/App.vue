@@ -140,15 +140,22 @@ export default {
     });
 
     socket.emit('server_getCurrentMusicIndex');
-    socket.on('client_getCurrentMusicIndex', (currentMusicIndex) => {
-      this.$store.commit('setCurrentMusicIndex', currentMusicIndex);
+    socket.on('client_getCurrentMusicIndex', (musicIndex) => {
+      this.$store.commit('setCurrentMusicIndex', musicIndex);
+    });
+
+    socket.emit('server_getCurrentPlaylistId');
+    socket.on('client_getCurrentPlaylistId', (playlistId) => {
+      this.$store.commit('setCurrentPlaylistId', playlistId);
     });
 
     // Récupérer la musique en base 64 à chaque fois qu'on change de musique en changeant l'index dans la MusicList
     socket.on('client_changeCurrentMusic', (music) => {
+      if (this.$store.getters.shouldAutoSkip) {
+        socket.emit('server_validateMusicReceived');
+      }
       this.$store.commit('setLoadingNewMusicIndex', null);
 
-      socket.emit('server_refreshPreviousMusicEnded');
       if (!this.currentMusic) {
         // On passe de pas de musique à une musique
         this.$store.commit('setInitFirstMusic', true);

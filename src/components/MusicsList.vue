@@ -125,6 +125,7 @@ export default {
         // event pour fermer la modal d'ajout de musiques à des playlists uniquement au client qui à fait l'ajout
         this.socket.on('client_closeAddMusicToPlaylistsModal', () => {
             this.$store.commit('setCloseAddMusicToPlaylistsModal', true);
+            this.$store.commit('setSnackbar', {color: 'secondary', message: 'Ajout effectué'});
         });
     },
     watch: {
@@ -148,5 +149,5 @@ export default {
     .musics-list {
         max-height: 380px;
         overflow-y: auto;
-    }    
+    }
 </style>
