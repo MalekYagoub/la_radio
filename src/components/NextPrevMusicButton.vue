@@ -32,7 +32,6 @@ export default {
                 } else {
                     indexOrIdToPass = this.currentMusicIndex === this.musics.length - 1 ? 0 : this.currentMusicIndex + 1;
                 }
-                console.log(indexOrIdToPass);
                 this.socket.emit('server_changeCurrentMusic', indexOrIdToPass);
             }
         }
