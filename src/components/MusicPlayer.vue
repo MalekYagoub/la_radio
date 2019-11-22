@@ -16,9 +16,9 @@
                         </v-col>
                         <v-col cols="auto">
                             <div class="d-flex align-center">
-                                <NextPrevMusicButton nextOrPrev="prev" class="mx-2"/>
+                                <NextPrevMusicButton nextOrPrev="prev" :randomState="randomState" class="mx-2"/>
                                 <PlayMusicButton :howler="howler" class="mx-2"/>
-                                <NextPrevMusicButton nextOrPrev="next" class="mx-2"/>
+                                <NextPrevMusicButton nextOrPrev="next" :randomState="randomState" class="mx-2"/>
                                 <div class="pl-1">
                                     <div>
                                         <v-tooltip right>
@@ -29,9 +29,6 @@
                                             </template>
                                             <span>Lecture aléatoire {{randomState === 0 ? 'désactivé' : 'activé'}}</span>
                                         </v-tooltip>
-                                        <v-btn class="ml-1" icon color="secondary">
-                                            <v-icon>star_border</v-icon>
-                                        </v-btn>
                                     </div>
                                     <MusicVolume class="pl-2" :volume="volume" @changeVolume="changeVolume"/>
                                 </div>
@@ -63,7 +60,7 @@ export default {
         MusicVolume,
     },
     computed: {
-        ...mapGetters(['socket', 'currentMusic', 'allowToPlay', 'musicState', 'musics', 'currentMusicIndex', 'initFirstMusic', 'shouldAutoSkip'])
+        ...mapGetters(['socket', 'randomState', 'currentMusic', 'currentPlaylist', 'allowToPlay', 'musicState', 'musics', 'currentMusicIndex', 'currentPlaylistMusicIndex', 'initFirstMusic', 'shouldAutoSkip'])
     },
     data () {
         return {
@@ -72,7 +69,6 @@ export default {
             musicSliderPosition: null,
             lastMusicInfo: null,
             volume: 1,
-            randomState: 0,
             getMusicStateHandler: () => {},
             videoTitleWidth: null // contient la largeur du titre pour savoir si on doit le faire scroll horizontalement ou pas
         }
@@ -106,8 +102,14 @@ export default {
 
         this.howler.on('end', () => {
             if (this.shouldAutoSkip) {
-                const indexToPass = (this.currentMusicIndex + 1) % (this.musics.length);
-                this.socket.emit('server_changeCurrentMusic', indexToPass);
+                if (this.currentPlaylist) {
+                    const idToPass = Object.keys(this.currentPlaylist.musics)[(this.currentPlaylistMusicIndex + 1) % (Object.keys(this.currentPlaylist.musics).length)];
+                    this.socket.emit('server_changeCurrentPlaylistMusicIndex', (this.currentPlaylistMusicIndex + 1) % (Object.keys(this.currentPlaylist.musics).length));
+                    this.socket.emit('server_changeCurrentMusic', idToPass);
+                } else {
+                    const indexToPass = (this.currentMusicIndex + 1) % (this.musics.length);
+                    this.socket.emit('server_changeCurrentMusic', indexToPass);
+                }
             }
         });
 
@@ -131,14 +133,14 @@ export default {
         });
 
         this.socket.on('client_setRandomState', (randomStateValue) => {
-            this.randomState = randomStateValue;
+            this.$store.commit('setRandomState', randomStateValue);
         });
 
         const vm = this;
         this.socket.emit('server_getMusicState');
         this.getMusicStateHandler = (currentMusicInfo) => {
             vm.musicSliderPosition = currentMusicInfo.currentMusicPosition;
-            vm.randomState = currentMusicInfo.randomState;
+            this.$store.commit('setRandomState', currentMusicInfo.randomState);
             if (currentMusicInfo.musicState === 'play' && !vm.allowedToGetMusicState && !vm.initFirstMusic) {
                 vm.$store.commit('setAllowToPlay', false);
             } else {
@@ -179,8 +181,14 @@ export default {
 
             this.howler.on('end', () => {
                 if (this.shouldAutoSkip) {
-                    const indexToPass = (this.currentMusicIndex + 1) % (this.musics.length);
-                    this.socket.emit('server_changeCurrentMusic', indexToPass);
+                    if (this.currentPlaylist) {
+                        const idToPass = Object.keys(this.currentPlaylist.musics)[(this.currentPlaylistMusicIndex + 1) % (Object.keys(this.currentPlaylist.musics).length)];
+                        this.socket.emit('server_changeCurrentPlaylistMusicIndex', (this.currentPlaylistMusicIndex + 1) % (Object.keys(this.currentPlaylist.musics).length));
+                        this.socket.emit('server_changeCurrentMusic', idToPass);
+                    } else {
+                        const indexToPass = (this.currentMusicIndex + 1) % (this.musics.length);
+                        this.socket.emit('server_changeCurrentMusic', indexToPass);
+                    }
                 }
             });
 

@@ -9,6 +9,9 @@
                         </v-btn>
                         <div v-if="selectedPlaylist !== null">
                             {{playlistTitleSliced}}
+                            <span class="white--text overline font-weight-bold">
+                                ({{selectedPlaylist.musics.length}})
+                            </span>
                         </div>
                     </div>
                     <span class="pl-4 playlists-label" v-else>
@@ -56,26 +59,37 @@
                 </v-fab-transition>
             </template>
         </v-toolbar>
-        <v-card-text class="playlists-container">
-            <!-- <v-container class="h-100" style="padding: 0;">
-                <v-row class="h-100" v-if="playlists.length > 0">
-                    <v-col v-for="playlist in playlists" :key="playlist.id" xs="6" sm="4" md="4" lg="4" xl="4">
-                            <PlaylistCard :playlist="playlist" @on-playlist-click="changeSelectedPlaylist" />
-                    </v-col>
-                </v-row>
-            </v-container> -->
+        <v-card-text class="playlists-container" v-if="playlists.length > 0">
             <v-fade-transition mode="out-in">
                 <v-scale-transition v-if="!selectedPlaylist" group tag="div" style="width: 100%;" class="d-flex flex-wrap">
                     <div class="playlist-card-container"  v-for="playlist in playlists" :key="playlist.id">
                         <PlaylistCard class="playlist-card" :playlist="playlist" @on-playlist-click="changeSelectedPlaylist" />
                     </div>
                 </v-scale-transition>
-                <v-list v-else one-line class="musics-list">
-                    <template v-for="music in selectedPlaylist.musics">
-                        <MusicRow :music="music" :index="findMusicIndex(music)" :key="music.videoId" :playlist="selectedPlaylist"/>
+                <v-list v-else-if="selectedPlaylist && selectedPlaylist.musics.length > 0" one-line class="musics-list">
+                    <template v-for="(music, index) in selectedPlaylist.musics">
+                        <MusicRow
+                            :music="music"
+                            :index="findMusicIndex(music)"
+                            :listIndex="index"
+                            :key="music.videoId"
+                            :playlist="selectedPlaylist"
+                        />
                     </template>
                 </v-list>
+                <div v-else class="mt-6 primary--text text-center font-weight-medium">
+                    <div  class="d-flex flex-column">
+                        <span>Aucune musique n'est présente dans cette playlist</span>
+                        <v-icon class="mt-2" x-large color="secondary">music_off</v-icon>
+                    </div>
+                </div>
             </v-fade-transition>
+        </v-card-text>
+        <v-card-text v-else class="primary--text text-center font-weight-medium">
+            <div class="d-flex flex-column">
+                <span>Aucune playlist n'est présente</span>
+                <v-icon class="mt-2" x-large color="secondary">music_off</v-icon>
+            </div>
         </v-card-text>
 
         <v-dialog v-model="showAddPlaylistModal" max-width="400">
@@ -167,11 +181,11 @@ export default {
             ],
             showPlaylistsActions: false,
             showDeleteModal: false,
-            showEditModal: false
+            showEditModal: false,
         }
     },
     computed: {
-        ...mapGetters(['socket', 'playlists', 'musics', 'currentPlaylistId', 'currentPlaylist']),
+        ...mapGetters(['socket', 'shouldAutoSkip', 'randomState', 'playlists', 'musics', 'currentPlaylistId', 'currentPlaylist', 'currentMusicIndex', 'currentPlaylistMusicIndex']),
         currentPlaylistTitleSliced () {
             if (this.currentPlaylist) {
                 return this.currentPlaylist.title.length > 12 ? this.currentPlaylist.title.slice(0, 12) + '...' : this.currentPlaylist.title;
@@ -278,6 +292,7 @@ export default {
             this.loading = false;
             this.showEditModal = false;
             this.playlistTitle = '';
+            this.selectedPlaylist.title = data.title;
             this.$store.commit('editPlaylist', {
                 title: data.title,
                 index: data.index
@@ -294,16 +309,63 @@ export default {
         });
 
         this.socket.on('client_deletedMusicFromPlaylist', (data) => {
-            for (let i = 0; i < this.selectedPlaylist.musics.length; i++) {
-                if (this.selectedPlaylist.musics[i].videoId === data.musicId) {
-                    this.selectedPlaylist.musics.splice(i, 1);
+            if (this.selectedPlaylist) {
+                for (let i = 0; i < this.selectedPlaylist.musics.length; i++) {
+                    if (this.selectedPlaylist.musics[i].videoId === data.musicId) {
+                        this.selectedPlaylist.musics.splice(i, 1);
+                        break;
+                    }
                 }
             }
+
+            if (this.currentPlaylistId === data.playlistId && this.currentMusicIndex === data.musicIndex) {
+                // Si on a supprimé une musique de la playlist qu'on écoute, faut passer à la suivante
+                let idToPass;
+                if (data.shouldGetFirstMusic) {
+                    idToPass = Object.keys(this.currentPlaylist.musics)[0];
+                } else {
+                    idToPass = Object.keys(this.currentPlaylist.musics)[(this.currentPlaylistMusicIndex + 1) % (Object.keys(this.currentPlaylist.musics).length)];
+                }
+                this.socket.emit('server_changeCurrentMusic', idToPass, false, null, true);
+            }
+
             this.$store.commit('deleteMusicFromPlaylist', data);
+        });
+
+        this.socket.on('client_deleteMusic', (deletedMusicInfo) => {
+            // écoute de l'event deleteMusic pour supprimer la musique qui vient d'être supprimé de la selectedPlaylist s'il y en a une
+            // Et passer à la prochaine musique de la currentPlaylist s'il y a une currentPlaylist
+
+            if (this.currentPlaylistId) {
+                // Index de la musique dans la playlist qu'on écoute pour passer à la suivante
+                const currentPlaylistMusicToDeleteIndex = Object.keys(this.currentPlaylist.musics).indexOf(deletedMusicInfo.musicId);
+
+                if (Object.keys(this.currentPlaylist.musics).length === 1 && this.shouldAutoSkip) {
+                    // On supprime la dernière musique de la playlist depuis la biblio donc il faut deselect la playlist et jouer la première musique de la biblio
+                    // this.socket.emit('server_changeCurrentPlaylistMusicIndex', 0);
+                    if (this.musics.length > 0) this.socket.emit('server_changeCurrentMusic', this.musics[0].videoId);
+                    this.socket.emit('server_changeCurrentPlaylistId', 0);
+                } else if (this.shouldAutoSkip && currentPlaylistMusicToDeleteIndex === this.currentPlaylistMusicIndex) {
+                    // Si on vient de supprimer une musique de la bibliothèque qu'on jouait dans la playlist qu'on écoute, il faut passer à la suivante
+                    // après l'avoir supprimé des réferences de la playlist
+                    const idToPass = Object.keys(this.currentPlaylist.musics)[(this.currentPlaylistMusicIndex + 1) % (Object.keys(this.currentPlaylist.musics).length)];
+                    this.socket.emit('server_changeCurrentMusic', idToPass, false, null, true);
+                }
+            }
+
+            if (this.selectedPlaylist) {
+                // Index de la musique dans la playlist qu'on a séléctionné pour la supprimer de celle-ci en reactive
+                const selectedPlaylistMusicIndex = this.selectedPlaylist.musics.findIndex((music) => deletedMusicInfo.musicId === music.videoId);
+                if (selectedPlaylistMusicIndex !== -1) this.selectedPlaylist.musics.splice(selectedPlaylistMusicIndex, 1);
+            }
         });
 
         this.socket.on('client_changedCurrentPlaylistId', (playlistId) => {
             this.$store.commit('setCurrentPlaylistId', playlistId);
+        });
+
+        this.socket.on('client_changedCurrentPlaylistMusicIndex', (currentPlaylistMusicIndex) => {
+            this.$store.commit('setCurrentPlaylistMusicIndex', currentPlaylistMusicIndex);
         });
     }
 }
@@ -317,8 +379,7 @@ export default {
     .playlists-container {
         height: calc(100% - 64px);
         overflow: auto;
-        /* padding-top: 22px; */
-        padding: 22px 0 0 0;
+        padding: 0;
     }
 
     .playlists-toolbar {
@@ -330,6 +391,7 @@ export default {
         width: 33%;
         display: flex;
         justify-content: center;
+        margin-top: 22px;
         margin-bottom: 15px;
     }
 
@@ -340,7 +402,7 @@ export default {
 
     .musics-list {
         max-height: 380px;
-        overflow-y: auto;
+        overflow-y: none;
     }
 
     .selected-playlist-title {

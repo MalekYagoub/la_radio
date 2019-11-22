@@ -22,7 +22,7 @@
 
             <v-list v-if="musics.length > 0" one-line class="musics-list">
                 <template v-for="(music, index) in computedMusicsList">
-                    <MusicRow :music="music" :index="findMusicIndex(music)" :key="index"/>
+                    <MusicRow :music="music" :index="findMusicIndex(music)" :listIndex="index" :key="index"/>
                 </template>
             </v-list>
             <v-card-text v-else class="primary--text text-center font-weight-medium">
@@ -56,7 +56,7 @@ export default {
         }
     },
     computed: {
-        ...mapGetters(['socket', 'musics', 'currentMusicIndex', 'initFirstMusic']),
+        ...mapGetters(['socket', 'musics', 'currentMusicIndex', 'initFirstMusic', 'currentPlaylistId']),
         computedMusicsList: function () {
             if (this.musics.length > 0) {
                 let vm = this;
@@ -101,7 +101,9 @@ export default {
                     let indexToPass = this.currentMusicIndex === this.musics.length - 1 ? 0 : this.currentMusicIndex;
 
                     this.$store.commit('setLastCurrentMusicToDelete', deletedMusicInfo);
-                    this.socket.emit('server_changeCurrentMusic', indexToPass, false, null, true);
+                    if (!this.currentPlaylistId) {
+                        this.socket.emit('server_changeCurrentMusic', indexToPass, false, null, true);
+                    }
                 }
             } else {
                 // Décrementer l'index de 1 pour garder la même musique en cours

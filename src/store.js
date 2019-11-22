@@ -9,8 +9,10 @@ export default new Vuex.Store({
     sessionId: null,
     musics: [],
     playlists: [],
+    randomState: 0,
     currentMusic: null,
     currentMusicIndex: null,
+    currentPlaylistMusicIndex: null,
     currentPlaylistId: null,
     snackbar: null,
     allowToPlay: true,
@@ -62,6 +64,9 @@ export default new Vuex.Store({
     setCurrentMusicIndex (state, payload) {
       state.currentMusicIndex = payload;
     },
+    setCurrentPlaylistMusicIndex (state, payload) {
+      state.currentPlaylistMusicIndex = payload;
+    },
     setMusicState (state, payload) {
       state.musicState = payload;
     },
@@ -112,6 +117,7 @@ export default new Vuex.Store({
       });
     },
     deleteMusicFromPlaylist (state, payload) {
+      // Delete une musique d'une playlist
       const musicIndex = state.musics.findIndex((music) => payload.musicId === music.videoId);
       const playlistIndex = state.playlists.findIndex((playlist) => payload.playlistId === playlist.id);
       delete state.musics[musicIndex].playlists[payload.playlistId];
@@ -119,6 +125,9 @@ export default new Vuex.Store({
     },
     setCurrentPlaylistId (state, payload) {
       state.currentPlaylistId = payload;
+    },
+    setRandomState (state, payload) {
+      state.randomState = payload;
     }
   },
   getters: {
@@ -129,6 +138,7 @@ export default new Vuex.Store({
     snackbar: state => state.snackbar,
     currentMusic: state => state.currentMusic,
     currentMusicIndex: state => state.currentMusicIndex,
+    currentPlaylistMusicIndex: state => state.currentPlaylistMusicIndex,
     allowToPlay: state => state.allowToPlay,
     musicState: state => state.musicState,
     lastCurrentMusicToDelete: state => state.lastCurrentMusicToDelete,
@@ -141,6 +151,7 @@ export default new Vuex.Store({
     currentPlaylist (state) {
       const playlistIndex = state.playlists.findIndex((playlist) => state.currentPlaylistId === playlist.id);
       return state.playlists[playlistIndex];
-    }
+    },
+    randomState: state => state.randomState
   }
 })

@@ -9,22 +9,31 @@
 import { mapGetters } from 'vuex';
 
 export default {
-    props: ['nextOrPrev'],
+    props: ['nextOrPrev', 'randomState'],
     computed: {
-        ...mapGetters(['socket', 'currentMusicIndex', 'musics', 'loadingNewMusicIndex']),
+        ...mapGetters(['socket', 'currentMusicIndex', 'currentPlaylistMusicIndex', 'musics', 'loadingNewMusicIndex', 'currentPlaylist']),
         disableButton () {
             return this.loadingNewMusicIndex !== null;
         }
     },
     methods: {
         changeMusic () {
-            let indexToPass;
+            let indexOrIdToPass;
             if (this.nextOrPrev === 'prev' ) {
-                indexToPass = this.currentMusicIndex === 0 ? this.musics.length - 1 : this.currentMusicIndex - 1;
-                this.socket.emit('server_changeCurrentMusic', indexToPass, false, 'prev');
+                if (this.currentPlaylist) {
+                    indexOrIdToPass = this.currentPlaylistMusicIndex === 0 ? Object.keys(this.currentPlaylist.musics)[Object.keys(this.currentPlaylist.musics).length - 1] : Object.keys(this.currentPlaylist.musics)[this.currentPlaylistMusicIndex - 1];
+                } else {
+                    indexOrIdToPass = this.currentMusicIndex === 0 ? this.musics.length - 1 : this.currentMusicIndex - 1;
+                }
+                this.socket.emit('server_changeCurrentMusic', indexOrIdToPass, false, 'prev');
             } else {
-                indexToPass = this.currentMusicIndex === this.musics.length - 1 ? 0 : this.currentMusicIndex + 1;
-                this.socket.emit('server_changeCurrentMusic', indexToPass);
+                if (this.currentPlaylist) {
+                    indexOrIdToPass = Object.keys(this.currentPlaylist.musics)[(this.currentPlaylistMusicIndex + 1) % (Object.keys(this.currentPlaylist.musics).length)];
+                } else {
+                    indexOrIdToPass = this.currentMusicIndex === this.musics.length - 1 ? 0 : this.currentMusicIndex + 1;
+                }
+                console.log(indexOrIdToPass);
+                this.socket.emit('server_changeCurrentMusic', indexOrIdToPass);
             }
         }
     }

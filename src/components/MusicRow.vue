@@ -58,10 +58,6 @@
                         <v-list-item-icon><v-icon color="secondary">playlist_add</v-icon></v-list-item-icon>
                         <v-list-item-title>Ajouter à une playlist</v-list-item-title>
                     </v-list-item>
-                    <v-list-item>
-                        <v-list-item-icon><v-icon color="secondary">star_border</v-icon></v-list-item-icon>
-                        <v-list-item-title>Ajouter aux favoris</v-list-item-title>
-                    </v-list-item>
                     <v-list-item @click="showDeleteModal = true">
                         <v-list-item-icon><v-icon color="secondary">delete</v-icon></v-list-item-icon>
                         <v-list-item-title>Supprimer la musique</v-list-item-title>
@@ -122,7 +118,7 @@
 import { mapGetters } from 'vuex';
 
 export default {
-    props: ['music', 'index', 'playlist'],
+    props: ['music', 'index', 'listIndex', 'playlist'],
     data () {
         return {
             showDeleteModal: false,
@@ -146,6 +142,7 @@ export default {
             if (this.playlist) {
                 // On change la playlist en cours
                 this.socket.emit('server_changeCurrentPlaylistId', this.playlist.id);
+                this.socket.emit('server_changeCurrentPlaylistMusicIndex', this.listIndex);
             } else {
                 this.socket.emit('server_changeCurrentPlaylistId', 0);
             }
@@ -169,14 +166,16 @@ export default {
             this.isRowAddingMusicToPlaylists = true;
             this.socket.emit('server_addMusicToPlaylists', {
                 music: this.music,
-                playlists: this.selectedPlaylists
+                playlists: this.selectedPlaylists,
+                index: this.index
             });
             this.selectedPlaylists = [];
         },
         deleteMusicFromPlaylist () {
             this.socket.emit('server_deleteMusicFromPlaylist', {
                 musicId: this.music.videoId,
-                playlistId: this.playlist.id
+                playlistId: this.playlist.id,
+                playlistMusicIndex: this.listIndex
             });
             this.showDeleteMusicFromPlaylistModal = false;
         }

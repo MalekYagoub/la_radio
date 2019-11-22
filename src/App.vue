@@ -96,8 +96,6 @@ export default {
   },
   data () {
     return {
-      base64Music: null,
-      musicSeconds: null,
       usersCount: 0
     }
   },
@@ -141,7 +139,13 @@ export default {
 
     socket.emit('server_getCurrentMusicIndex');
     socket.on('client_getCurrentMusicIndex', (musicIndex) => {
+      if (!musicIndex && musicIndex !== 0) this.$store.commit('setPlayerLoaded', true);
       this.$store.commit('setCurrentMusicIndex', musicIndex);
+    });
+
+    socket.emit('server_getCurrentPlaylistMusicIndex');
+    socket.on('client_getCurrentPlaylistMusicIndex', (playlistMusicIndex) => {
+      this.$store.commit('setCurrentPlaylistMusicIndex', playlistMusicIndex);
     });
 
     socket.emit('server_getCurrentPlaylistId');
