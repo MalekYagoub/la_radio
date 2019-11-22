@@ -1,6 +1,6 @@
 <template>
     <v-card height="445" class="mx-auto">
-        <v-toolbar height="64" class="playlists-toolbar" color="secondary" style="z-index: 3;" dark>
+        <v-toolbar height="64" class="playlists-toolbar" :color="currentPlaylistId ? '#00796b' : 'secondary'" style="z-index: 3;" dark>
             <v-toolbar-title style="width: 100%;" class="d-flex align-center justify-space-between">
                 <v-slide-x-transition mode="out-in">
                     <div class="pl-3" style="display: inherit;" v-if="selectedPlaylist !== null">
@@ -380,11 +380,14 @@ export default {
         height: calc(100% - 64px);
         overflow: auto;
         padding: 0;
+        scrollbar-color: #dfdfdf #f2f2f2;
+        scrollbar-width: thin;
     }
 
     .playlists-toolbar {
         border-bottom-left-radius: 0 !important;
         border-bottom-right-radius: 0 !important;
+        transition: 0.5s all !important;
     }
 
     .playlist-card-container {

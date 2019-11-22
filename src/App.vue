@@ -179,8 +179,28 @@ export default {
 };
 </script>
 
-<style scoped>
+<style>
   main {
     background-color: #f5f5f5;
+  }
+
+  /* width */
+  ::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  /* Track */
+  ::-webkit-scrollbar-track {
+    background: #f2f2f2;
+  }
+
+  /* Handle */
+  ::-webkit-scrollbar-thumb {
+    background: #dfdfdf;
+  }
+
+  /* Handle on hover */
+  ::-webkit-scrollbar-thumb:hover {
+    background: #c5c5c5;
   }
 </style>

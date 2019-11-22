@@ -1,7 +1,7 @@
 <template>
     <div class="musics-list-container">
         <v-card class="mx-auto">
-            <v-toolbar height="64" color="secondary" dark>
+            <v-toolbar class="toolbar-transition" height="64" :color="!currentPlaylistId ? '#00796b' : 'secondary'" dark>
                 <v-toolbar-title class="pl-4">
                     Bibliothèque
                     <span class="white--text overline font-weight-bold">
@@ -151,5 +151,11 @@ export default {
     .musics-list {
         max-height: 380px;
         overflow-y: auto;
+        scrollbar-color: #dfdfdf #f2f2f2;
+        scrollbar-width: thin;
+    }
+
+    .toolbar-transition {
+        transition: 0.5s all !important;
     }
 </style>
