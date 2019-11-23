@@ -59,9 +59,15 @@
                 </v-fab-transition>
             </template>
         </v-toolbar>
-        <v-card-text class="playlists-container" v-if="playlists.length > 0">
+        <v-card-text class="playlists-container">
             <v-fade-transition mode="out-in">
-                <v-scale-transition v-if="!selectedPlaylist" group tag="div" style="width: 100%;" class="d-flex flex-wrap">
+                <div v-if="playlists.length === 0" class="primary--text text-center font-weight-medium h-100--without-bar d-flex justify-center">
+                    <div class="d-flex flex-column justify-center">
+                        <span>Aucune playlist n'est présente</span>
+                        <v-icon class="mt-2" x-large color="secondary">music_off</v-icon>
+                    </div>
+                </div>
+                <v-scale-transition v-else-if="!selectedPlaylist" group tag="div" style="width: 100%;" class="d-flex flex-wrap">
                     <div class="playlist-card-container"  v-for="playlist in playlists" :key="playlist.id">
                         <PlaylistCard class="playlist-card" :playlist="playlist" @on-playlist-click="changeSelectedPlaylist" />
                     </div>
@@ -77,19 +83,13 @@
                         />
                     </template>
                 </v-list>
-                <div v-else class="mt-6 primary--text text-center font-weight-medium">
-                    <div  class="d-flex flex-column">
+                <div v-else-if="selectedPlaylist && selectedPlaylist.musics.length === 0" class="primary--text text-center font-weight-medium h-100--without-bar d-flex justify-center">
+                    <div class="d-flex flex-column justify-center">
                         <span>Aucune musique n'est présente dans cette playlist</span>
                         <v-icon class="mt-2" x-large color="secondary">music_off</v-icon>
                     </div>
                 </div>
             </v-fade-transition>
-        </v-card-text>
-        <v-card-text v-else class="primary--text text-center font-weight-medium">
-            <div class="d-flex flex-column">
-                <span>Aucune playlist n'est présente</span>
-                <v-icon class="mt-2" x-large color="secondary">music_off</v-icon>
-            </div>
         </v-card-text>
 
         <v-dialog v-model="showAddPlaylistModal" max-width="400">
@@ -374,6 +374,10 @@ export default {
 <style scoped>
     .h-100 {
         height: 100%;
+    }
+
+    .h-100--without-bar {
+        height: calc(100% - 64px);
     }
 
     .playlists-container {

@@ -130,6 +130,7 @@ export default {
     socket.emit('server_getMusics');
     socket.on('client_getMusics', (musics) => {
       this.$store.commit('setMusics', musics);
+      socket.emit('server_getCurrentMusicIndex');
     });
 
     socket.emit('server_getPlaylists');
@@ -137,7 +138,6 @@ export default {
       this.$store.commit('setPlaylists', playlists);
     });
 
-    socket.emit('server_getCurrentMusicIndex');
     socket.on('client_getCurrentMusicIndex', (musicIndex) => {
       if (!musicIndex && musicIndex !== 0) this.$store.commit('setPlayerLoaded', true);
       this.$store.commit('setCurrentMusicIndex', musicIndex);
