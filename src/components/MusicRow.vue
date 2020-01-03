@@ -10,14 +10,14 @@
                     >
                     <v-list-item-avatar style="margin: auto;">
                         <v-img :src="music.thumbnail"></v-img>
-                        <v-icon v-if="musicState === 'pause' || index !== currentMusicIndex" @click="selectMusicToPlay(index)" :class="{ 'play-arrow-icon--hover': hover, 'play-arrow-icon': true }">play_arrow</v-icon>
-                        <v-icon v-else @click="pauseMusic" :class="{ 'play-arrow-icon--hover': hover, 'play-arrow-icon': true }">pause</v-icon>
+                        <v-icon v-if="hover && musicState === 'pause' || index !== currentMusicIndex" @click="selectMusicToPlay(index)" :class="{ 'play-arrow-icon--hover': hover, 'play-arrow-icon': true }">play_arrow</v-icon>
+                        <v-icon v-else-if="hover" @click="pauseMusic" :class="{ 'play-arrow-icon--hover': hover, 'play-arrow-icon': true }">pause</v-icon>
                     </v-list-item-avatar>
                 </v-progress-circular>
                 <v-list-item-avatar style="margin-left: 3px" v-show="loadingNewMusicIndex === null || loadingNewMusicIndex !== index">
                     <v-img :src="music.thumbnail"></v-img>
-                    <v-icon v-if="musicState === 'pause' || index !== currentMusicIndex" @click="selectMusicToPlay(index)" :class="{ 'play-arrow-icon--hover': hover, 'play-arrow-icon': true }">play_arrow</v-icon>
-                    <v-icon v-else @click="pauseMusic" :class="{ 'play-arrow-icon--hover': hover, 'play-arrow-icon': true }">pause</v-icon>
+                    <v-icon v-if="hover && musicState === 'pause' || index !== currentMusicIndex" @click="selectMusicToPlay(index)" :class="{ 'play-arrow-icon--hover': hover, 'play-arrow-icon': true }">play_arrow</v-icon>
+                    <v-icon v-else-if="hover" @click="pauseMusic" :class="{ 'play-arrow-icon--hover': hover, 'play-arrow-icon': true }">pause</v-icon>
                 </v-list-item-avatar>
             </div>
 
