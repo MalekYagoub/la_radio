@@ -1,25 +1,11 @@
 <template>
     <v-hover v-slot:default="{ hover }">
         <v-list-item :class="{ 'music-row': true, 'ml-5': index === currentMusicIndex, 'music-row--selected': index === currentMusicIndex }">
-            <div style="width: 46px; margin-right: 24px;">
-                <v-progress-circular
-                    v-show="loadingNewMusicIndex !== null && loadingNewMusicIndex === index"
-                    indeterminate
-                    color="secondary"
-                    :size="46"
-                    >
-                    <v-list-item-avatar style="margin: auto;">
-                        <v-img :src="music.thumbnail"></v-img>
-                        <v-icon v-if="hover && musicState === 'pause' || index !== currentMusicIndex" @click="selectMusicToPlay(index)" :class="{ 'play-arrow-icon--hover': hover, 'play-arrow-icon': true }">play_arrow</v-icon>
-                        <v-icon v-else-if="hover" @click="pauseMusic" :class="{ 'play-arrow-icon--hover': hover, 'play-arrow-icon': true }">pause</v-icon>
-                    </v-list-item-avatar>
-                </v-progress-circular>
-                <v-list-item-avatar style="margin-left: 3px" v-show="loadingNewMusicIndex === null || loadingNewMusicIndex !== index">
-                    <v-img :src="music.thumbnail"></v-img>
-                    <v-icon v-if="hover && musicState === 'pause' || index !== currentMusicIndex" @click="selectMusicToPlay(index)" :class="{ 'play-arrow-icon--hover': hover, 'play-arrow-icon': true }">play_arrow</v-icon>
-                    <v-icon v-else-if="hover" @click="pauseMusic" :class="{ 'play-arrow-icon--hover': hover, 'play-arrow-icon': true }">pause</v-icon>
-                </v-list-item-avatar>
-            </div>
+            <v-list-item-avatar style="margin-left: 3px">
+                <v-img :src="music.thumbnail"></v-img>
+                <v-icon v-if="hover && musicState === 'pause' || index !== currentMusicIndex" @click="selectMusicToPlay(index)" :class="{ 'play-arrow-icon--hover': hover, 'play-arrow-icon': true }">play_arrow</v-icon>
+                <v-icon v-else-if="hover" @click="pauseMusic" :class="{ 'play-arrow-icon--hover': hover, 'play-arrow-icon': true }">pause</v-icon>
+            </v-list-item-avatar>
 
             <v-list-item-content>
                 <v-list-item-title :class="{ 'accent--text font-weight-medium': index === currentMusicIndex }" v-html="music.videoTitle"></v-list-item-title>
