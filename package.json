@@ -15,7 +15,7 @@
     "material-design-icons-iconfont": "^5.0.1",
     "socket.io-client": "^2.2.0",
     "vue": "^2.6.10",
-    "vuetify": "^2.0.0",
+    "vuetify": "^2.6.10",
     "vuex": "^3.0.1",
     "youtube-regex": "^1.0.5",
     "ytdl-core": "^0.29.7"
